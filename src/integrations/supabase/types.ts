@@ -55,6 +55,235 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          active: boolean
+          bank_name: string | null
+          created_at: string
+          currency: string
+          iban: string | null
+          id: string
+          name: string
+          opening_balance: number
+          organization_id: string
+          type: Database["public"]["Enums"]["account_type"]
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bank_name?: string | null
+          created_at?: string
+          currency?: string
+          iban?: string | null
+          id?: string
+          name: string
+          opening_balance?: number
+          organization_id: string
+          type?: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bank_name?: string | null
+          created_at?: string
+          currency?: string
+          iban?: string | null
+          id?: string
+          name?: string
+          opening_balance?: number
+          organization_id?: string
+          type?: Database["public"]["Enums"]["account_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          nif: string | null
+          organization_id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          nif?: string | null
+          organization_id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          nif?: string | null
+          organization_id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          description: string
+          id: string
+          invoice_id: string
+          line_subtotal: number | null
+          line_tax: number | null
+          organization_id: string
+          quantity: number
+          sort_order: number
+          tax_rate: number
+          unit_price: number
+        }
+        Insert: {
+          description: string
+          id?: string
+          invoice_id: string
+          line_subtotal?: number | null
+          line_tax?: number | null
+          organization_id: string
+          quantity: number
+          sort_order?: number
+          tax_rate?: number
+          unit_price: number
+        }
+        Update: {
+          description?: string
+          id?: string
+          invoice_id?: string
+          line_subtotal?: number | null
+          line_tax?: number | null
+          organization_id?: string
+          quantity?: number
+          sort_order?: number
+          tax_rate?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_paid: number
+          cancel_reason: string | null
+          created_at: string
+          created_by: string
+          customer_id: string
+          doc_type: Database["public"]["Enums"]["invoice_doc_type"]
+          due_date: string | null
+          id: string
+          issue_date: string
+          notes: string | null
+          number: string | null
+          organization_id: string
+          seq: number | null
+          series: number | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          tax_total: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          cancel_reason?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id: string
+          doc_type?: Database["public"]["Enums"]["invoice_doc_type"]
+          due_date?: string | null
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string | null
+          organization_id: string
+          seq?: number | null
+          series?: number | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_total?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          cancel_reason?: string | null
+          created_at?: string
+          created_by?: string
+          customer_id?: string
+          doc_type?: Database["public"]["Enums"]["invoice_doc_type"]
+          due_date?: string | null
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string | null
+          organization_id?: string
+          seq?: number | null
+          series?: number | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_total?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -348,11 +577,90 @@ export type Database = {
           },
         ]
       }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          invoice_id: string | null
+          kind: Database["public"]["Enums"]["tx_kind"]
+          organization_id: string
+          reference: string | null
+          tx_date: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string | null
+          kind: Database["public"]["Enums"]["tx_kind"]
+          organization_id: string
+          reference?: string | null
+          tx_date?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          invoice_id?: string | null
+          kind?: Database["public"]["Enums"]["tx_kind"]
+          organization_id?: string
+          reference?: string | null
+          tx_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      account_balances: {
+        Args: { _org: string }
+        Returns: {
+          account_id: string
+          balance: number
+        }[]
+      }
+      admin_set_org_status: {
+        Args: {
+          _org: string
+          _reason: string
+          _status: Database["public"]["Enums"]["org_status"]
+        }
+        Returns: undefined
+      }
+      cancel_invoice: {
+        Args: { _invoice: string; _reason: string }
+        Returns: undefined
+      }
       create_organization: {
         Args: { _name: string; _nif: string; _plan_code?: string }
         Returns: string
@@ -371,6 +679,16 @@ export type Database = {
       }
       is_org_member: { Args: { _org: string; _uid: string }; Returns: boolean }
       is_platform_admin: { Args: { _uid: string }; Returns: boolean }
+      issue_invoice: { Args: { _invoice: string }; Returns: string }
+      register_invoice_payment: {
+        Args: {
+          _account: string
+          _amount: number
+          _invoice: string
+          _reference?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       account_type: "bank" | "cash"
