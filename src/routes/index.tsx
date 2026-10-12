@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/session";
 import { MODULES } from "@/lib/modules";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,15 +51,6 @@ function Index() {
           ))}
         </section>
       </main>
-    </div>
-  );
-}
-
-export function Logo() {
-  return (
-    <div className="flex items-center gap-2 font-display text-lg font-semibold text-sidebar-accent-foreground">
-      <span className="grid h-8 w-8 place-items-center rounded-md bg-copper text-copper-foreground">N</span>
-      Nexora
     </div>
   );
 }
