@@ -13,9 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppAuditoriaRouteImport } from './routes/_authenticated/app.auditoria'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/app.clientes'
+import { Route as AuthenticatedAppEquipaRouteImport } from './routes/_authenticated/app.equipa'
 import { Route as AuthenticatedAppFinancasRouteImport } from './routes/_authenticated/app.financas'
+import { Route as AuthenticatedAppModulosRouteImport } from './routes/_authenticated/app.modulos'
+import { Route as AuthenticatedAppPlanosRouteImport } from './routes/_authenticated/app.planos'
+import { Route as AuthenticatedAppFaturacaoIndexRouteImport } from './routes/_authenticated/app.faturacao.index'
+import { Route as AuthenticatedAppFaturacaoIdRouteImport } from './routes/_authenticated/app.faturacao.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -36,21 +43,59 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppAuditoriaRoute =
+  AuthenticatedAppAuditoriaRouteImport.update({
+    id: '/app/auditoria',
+    path: '/app/auditoria',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAppClientesRoute =
   AuthenticatedAppClientesRouteImport.update({
     id: '/app/clientes',
     path: '/app/clientes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAppEquipaRoute = AuthenticatedAppEquipaRouteImport.update({
+  id: '/app/equipa',
+  path: '/app/equipa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppFinancasRoute =
   AuthenticatedAppFinancasRouteImport.update({
     id: '/app/financas',
     path: '/app/financas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppModulosRoute = AuthenticatedAppModulosRouteImport.update({
+  id: '/app/modulos',
+  path: '/app/modulos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppPlanosRoute = AuthenticatedAppPlanosRouteImport.update({
+  id: '/app/planos',
+  path: '/app/planos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppFaturacaoIndexRoute =
+  AuthenticatedAppFaturacaoIndexRouteImport.update({
+    id: '/app/faturacao/',
+    path: '/app/faturacao/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAppFaturacaoIdRoute =
+  AuthenticatedAppFaturacaoIdRouteImport.update({
+    id: '/app/faturacao/$id',
+    path: '/app/faturacao/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -58,17 +103,31 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/app/financas': typeof AuthenticatedAppFinancasRoute
+  '/app/modulos': typeof AuthenticatedAppModulosRoute
+  '/app/planos': typeof AuthenticatedAppPlanosRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/faturacao/$id': typeof AuthenticatedAppFaturacaoIdRoute
+  '/app/faturacao/': typeof AuthenticatedAppFaturacaoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/app/financas': typeof AuthenticatedAppFinancasRoute
+  '/app/modulos': typeof AuthenticatedAppModulosRoute
+  '/app/planos': typeof AuthenticatedAppPlanosRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/faturacao/$id': typeof AuthenticatedAppFaturacaoIdRoute
+  '/app/faturacao': typeof AuthenticatedAppFaturacaoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,9 +135,16 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/_authenticated/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/_authenticated/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/_authenticated/app/financas': typeof AuthenticatedAppFinancasRoute
+  '/_authenticated/app/modulos': typeof AuthenticatedAppModulosRoute
+  '/_authenticated/app/planos': typeof AuthenticatedAppPlanosRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/faturacao/$id': typeof AuthenticatedAppFaturacaoIdRoute
+  '/_authenticated/app/faturacao/': typeof AuthenticatedAppFaturacaoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,26 +152,47 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/admin'
+    | '/app/auditoria'
     | '/app/clientes'
+    | '/app/equipa'
     | '/app/financas'
+    | '/app/modulos'
+    | '/app/planos'
     | '/app/'
+    | '/app/faturacao/$id'
+    | '/app/faturacao/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/admin'
+    | '/app/auditoria'
     | '/app/clientes'
+    | '/app/equipa'
     | '/app/financas'
+    | '/app/modulos'
+    | '/app/planos'
     | '/app'
+    | '/app/faturacao/$id'
+    | '/app/faturacao'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/admin'
+    | '/_authenticated/app/auditoria'
     | '/_authenticated/app/clientes'
+    | '/_authenticated/app/equipa'
     | '/_authenticated/app/financas'
+    | '/_authenticated/app/modulos'
+    | '/_authenticated/app/planos'
     | '/_authenticated/app/'
+    | '/_authenticated/app/faturacao/$id'
+    | '/_authenticated/app/faturacao/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,11 +232,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
       path: '/app'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/auditoria': {
+      id: '/_authenticated/app/auditoria'
+      path: '/app/auditoria'
+      fullPath: '/app/auditoria'
+      preLoaderRoute: typeof AuthenticatedAppAuditoriaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/clientes': {
@@ -159,6 +260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/equipa': {
+      id: '/_authenticated/app/equipa'
+      path: '/app/equipa'
+      fullPath: '/app/equipa'
+      preLoaderRoute: typeof AuthenticatedAppEquipaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/financas': {
       id: '/_authenticated/app/financas'
       path: '/app/financas'
@@ -166,19 +274,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppFinancasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/modulos': {
+      id: '/_authenticated/app/modulos'
+      path: '/app/modulos'
+      fullPath: '/app/modulos'
+      preLoaderRoute: typeof AuthenticatedAppModulosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/planos': {
+      id: '/_authenticated/app/planos'
+      path: '/app/planos'
+      fullPath: '/app/planos'
+      preLoaderRoute: typeof AuthenticatedAppPlanosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/faturacao/': {
+      id: '/_authenticated/app/faturacao/'
+      path: '/app/faturacao'
+      fullPath: '/app/faturacao/'
+      preLoaderRoute: typeof AuthenticatedAppFaturacaoIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/faturacao/$id': {
+      id: '/_authenticated/app/faturacao/$id'
+      path: '/app/faturacao/$id'
+      fullPath: '/app/faturacao/$id'
+      preLoaderRoute: typeof AuthenticatedAppFaturacaoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAppAuditoriaRoute: typeof AuthenticatedAppAuditoriaRoute
   AuthenticatedAppClientesRoute: typeof AuthenticatedAppClientesRoute
+  AuthenticatedAppEquipaRoute: typeof AuthenticatedAppEquipaRoute
   AuthenticatedAppFinancasRoute: typeof AuthenticatedAppFinancasRoute
+  AuthenticatedAppModulosRoute: typeof AuthenticatedAppModulosRoute
+  AuthenticatedAppPlanosRoute: typeof AuthenticatedAppPlanosRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppFaturacaoIdRoute: typeof AuthenticatedAppFaturacaoIdRoute
+  AuthenticatedAppFaturacaoIndexRoute: typeof AuthenticatedAppFaturacaoIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAppAuditoriaRoute: AuthenticatedAppAuditoriaRoute,
   AuthenticatedAppClientesRoute: AuthenticatedAppClientesRoute,
+  AuthenticatedAppEquipaRoute: AuthenticatedAppEquipaRoute,
   AuthenticatedAppFinancasRoute: AuthenticatedAppFinancasRoute,
+  AuthenticatedAppModulosRoute: AuthenticatedAppModulosRoute,
+  AuthenticatedAppPlanosRoute: AuthenticatedAppPlanosRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppFaturacaoIdRoute: AuthenticatedAppFaturacaoIdRoute,
+  AuthenticatedAppFaturacaoIndexRoute: AuthenticatedAppFaturacaoIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
