@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatKz, formatDate, errMsg, INVOICE_STATUS, DOC_TYPES } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/faturacao/")({
-  validateSearch: (s: Record<string, unknown>) => ({ novo: s.novo === true || s.novo === "true" ? true : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({ novo: s["novo"] === true || s["novo"] === "true" ? true : undefined }),
   head: () => ({ meta: [{ title: "Faturação — Nexora" }, { name: "description", content: "Faturas e documentos comerciais." }, { property: "og:title", content: "Faturação — Nexora" }, { property: "og:description", content: "Faturas e documentos comerciais." }] }),
   component: Invoices,
 });
