@@ -64,7 +64,7 @@ function Invoices() {
           </table>
         </div>
       )}
-      <NewInvoiceDialog open={open} onOpenChange={(o) => { setOpen(o); if (!o && novo) navigate({ to: "/app/faturacao", search: {} }); }} />
+      <NewInvoiceDialog open={open} onOpenChange={(o) => { setOpen(o); if (!o && novo) navigate({ to: "/app/faturacao", search: { novo: undefined } }); }} />
     </>
   );
 }
