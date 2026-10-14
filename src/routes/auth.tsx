@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/Logo";
 import { useSession } from "@/lib/session";
 import { errMsg } from "@/lib/format";
+import authBg from "@/assets/auth-tech.svg";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -69,10 +70,11 @@ function AuthPage() {
 
   return (
     <div className="grid min-h-screen md:grid-cols-2">
-      <div className="hidden flex-col justify-between bg-sidebar p-10 md:flex">
-        <Logo />
-        <p className="max-w-sm font-display text-3xl text-sidebar-accent-foreground">Gestão séria para empresas que crescem em Angola.</p>
-        <p className="text-xs text-sidebar-foreground/60">© Nexora</p>
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-brand-dark p-10 md:flex">
+        <img src={authBg} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-60" />
+        <div className="relative"><Logo /></div>
+        <p className="relative max-w-sm font-display text-3xl text-sidebar-accent-foreground">Tudo o que o seu negócio precisa, num só lugar.</p>
+        <p className="relative text-xs text-sidebar-foreground/60">Mais controlo. Mais eficiência. Mais crescimento.</p>
       </div>
       <div className="flex items-center justify-center p-6">
         <form onSubmit={submit} className="w-full max-w-sm space-y-5">
