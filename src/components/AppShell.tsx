@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useOrg, FINANCE_READ, ADMINS } from "@/lib/org";
+import { useOrg, FINANCE_READ } from "@/lib/org";
 import { useSession } from "@/lib/session";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
@@ -54,13 +54,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         const active = n.to === "/app" ? path === "/app" : path.startsWith(n.to);
         return (
           <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/60"}`}>
-            <n.icon className={`h-4 w-4 ${active ? "text-sidebar-primary" : ""}`} />{n.label}
+            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-border"}`}>
+            <n.icon className={`h-4 w-4 `} />{n.label}
           </Link>
         );
       })}
       {admin.data && (
-        <Link to="/admin" onClick={() => setOpen(false)} className={`mt-4 flex items-center gap-3 rounded-md px-3 py-2 text-sm ${path.startsWith("/admin") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/60"}`}>
+        <Link to="/admin" onClick={() => setOpen(false)} className={`mt-4 flex items-center gap-3 rounded-md px-3 py-2 text-sm ${path.startsWith("/admin") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-border"}`}>
           <Shield className="h-4 w-4" />Administração Nexora
         </Link>
       )}
@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {memberships.length > 0 && (
         <div className="px-3">
           <Select value={current?.organization_id} onValueChange={(v) => { setOrgId(v); navigate({ to: "/app" }); }}>
-            <SelectTrigger className="border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="border-sidebar-border bg-sidebar-border text-sidebar-accent-foreground"><SelectValue /></SelectTrigger>
             <SelectContent>
               {memberships.map((m) => <SelectItem key={m.organization_id} value={m.organization_id}>{m.organizations?.name}</SelectItem>)}
             </SelectContent>

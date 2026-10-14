@@ -92,7 +92,7 @@ function PlanEditor({ plan, onSaved }: { plan: Plan; onSaved: () => void }) {
   async function save() {
     const patch = Object.fromEntries(Object.entries(f).map(([k, v]) => [k, Number(v)]));
     if (Object.values(patch).some((v) => !(v >= 0))) return toast.error("Valores inválidos.");
-    const { error } = await supabase.from("plans").update(patch).eq("id", plan.id);
+    const { error } = await supabase.from("plans").update(patch as never).eq("id", plan.id);
     if (error) return toast.error(errMsg(error));
     toast.success(`Plano ${plan.name} atualizado.`); onSaved();
   }

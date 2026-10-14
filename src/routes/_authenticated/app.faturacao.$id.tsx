@@ -70,13 +70,13 @@ function InvoiceDetail() {
     const { error } = await supabase.from("invoices").delete().eq("id", id);
     if (error) return toast.error(errMsg(error));
     toast.success("Rascunho apagado.");
-    refresh(); navigate({ to: "/app/faturacao", search: {} });
+    refresh(); navigate({ to: "/app/faturacao", search: { novo: undefined } });
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4 print:hidden">
-        <Link to="/app/faturacao" search={{}} className="text-sm text-muted-foreground hover:text-foreground">← Faturação</Link>
+        <Link to="/app/faturacao" search={{ novo: undefined }} className="text-sm text-muted-foreground hover:text-foreground">← Faturação</Link>
         <div className="flex flex-wrap gap-2">
           {draft && can(SALES_WRITE) && <>
             <Button variant="ghost" onClick={removeDraft}>Apagar rascunho</Button>
