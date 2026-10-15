@@ -1,8 +1,13 @@
 # Nexora roadmap
-- [x] Fase 1: base (contas, empresas, papéis, planos, auditoria) + Finanças + Faturação + Clientes + Admin
-- [x] Aplicar Brand Kit (cores azul/navy, Montserrat, logótipo N, favicon, imagens de módulos como referência)
-- [ ] Próximas fases: restantes 20 módulos
-- [ ] Testar páginas internas (bloqueado: confirmar qual conta é sua)
-- [ ] Pagamentos online (bloqueado: requer plano pago da Lovable)
-- [x] Convites de equipa (envio por email bloqueado: falta domínio de email)
-- [ ] Ligar repositório GitHub (bloqueado: só o utilizador pode autorizar)
+- [x] Fase 1: base + Finance (finanças, faturação) + clientes + admin
+- [x] Brand Kit aplicado
+- [x] Endurecimento de segurança (convites, referências cruzadas, idempotência de pagamentos)
+- [x] Mapa 24 módulos → 10 plataformas (docs/NEXORA_MASTER_IMPLEMENTATION.md)
+- [ ] Catálogo da app reorganizado nas 10 plataformas
+- [ ] Sales & CX: CRM, oportunidades, tickets
+- [ ] Supply, People, Projects, Operations, Manufacturing, Education, Hospitality, Legal
+- [ ] Repor `noImplicitReturns` e `exactOptionalPropertyTypes` no TypeScript
+- [ ] Testar páginas internas (bloqueado: confirmar a sua conta)
+- [ ] Pagamentos online (bloqueado: plano pago da Lovable)
+- [ ] Email de convites (bloqueado: domínio de email)
+- [ ] GitHub (bloqueado: autorização pelo utilizador)
