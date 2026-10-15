@@ -5,3 +5,4 @@
 - [ ] Testar páginas internas com a conta do utilizador
 - [ ] Pagamentos online das assinaturas
 - [ ] Convites de equipa por email
+- [ ] Ligar repositório GitHub (bloqueado: só o utilizador pode autorizar)
