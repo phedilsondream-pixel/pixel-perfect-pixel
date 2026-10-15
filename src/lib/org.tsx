@@ -33,6 +33,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     queryKey: ["memberships", uid],
     enabled: !!uid,
     queryFn: async () => {
+      await supabase.rpc("accept_my_invitations");
       const { data, error } = await supabase
         .from("organization_members")
         .select("organization_id, role, organizations(id, name, nif, status, default_tax_rate)")
