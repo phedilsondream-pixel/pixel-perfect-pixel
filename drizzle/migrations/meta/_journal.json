@@ -29,6 +29,13 @@
       "when": 1792032205020,
       "tag": "0003_team_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792036424570,
+      "tag": "0004_security_hardening_invites_refs",
+      "breakpoints": true
     }
   ]
 }
