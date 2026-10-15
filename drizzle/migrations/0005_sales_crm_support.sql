@@ -60,7 +60,6 @@ create trigger support_ticket_customer_check
 
 grant select, insert, update, delete on public.sales_opportunities, public.support_tickets to authenticated;
 grant all on public.sales_opportunities, public.support_tickets to service_role;
-grant usage, select on all sequences in schema public to authenticated;
 
 alter table public.sales_opportunities enable row level security;
 alter table public.support_tickets enable row level security;
