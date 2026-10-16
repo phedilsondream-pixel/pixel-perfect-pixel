@@ -29,8 +29,9 @@
 Consumo de material em projeto = movimento de stock + custo de projeto, nunca despesa adicional; todas as operações com chave de idempotência.
 
 
-## Estado de validação do branch (15/10/2026)
-- A execução CI anterior confirmou instalação e testes unitários, mas TypeScript e build falharam porque a página inicial ainda importava `MODULES`; a página inicial foi alinhada com `PLATFORMS` no branch.
-- O lint anterior encontrou deriva de formatação Prettier espalhada no código legado e um erro `prefer-const`; o erro direto foi corrigido e a formatação foi separada do lint de correção funcional. É obrigatório reexecutar CI antes de considerar esta etapa aprovada.
+## Estado de validação do branch (17/10/2026)
+- CI mais recente consultada: testes unitários, TypeScript e build passaram; o lint falhou com erros Prettier herdados (a configuração de override foi corrigida num commit posterior, ainda sem resultado CI confirmado).
+- A página inicial está alinhada com `PLATFORMS`; os testes cobrem os dez IDs e os estados do catálogo.
 - As migrations 0005 e 0006 são alterações de código, não prova de que foram aplicadas à base ativa. Não aplicar automaticamente sem ambiente de teste/backup e validação SQL.
-- Não foi confirmado acesso à base ativa, credenciais de teste ou sincronização GitHub→Lovable. Essas verificações permanecem abertas.
+- A branch contém 16 commits à frente de `main` e 0 atrás. A `main` continua no SHA `636aa072f4eb387509eee79d213b68dfa39678ef`.
+- O projeto Lovable consultado continua a indicar esse SHA antigo; sincronização GitHub→Lovable não está confirmada. Não foi aplicado qualquer SQL à base ativa nem publicada a aplicação.
