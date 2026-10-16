@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu, Sparkles, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg, FINANCE_READ } from "@/lib/org";
 import { useSession } from "@/lib/session";
@@ -54,13 +54,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         const active = n.to === "/app" ? path === "/app" : path.startsWith(n.to);
         return (
           <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-border"}`}>
-            <n.icon className={`h-4 w-4 `} />{n.label}
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${active ? "bg-gradient-to-r from-blue-600/90 to-sky-500/80 text-white shadow-lg shadow-blue-950/20" : "text-sidebar-foreground/80 hover:bg-white/[0.06] hover:text-white"}`}>
+            <n.icon className="h-4 w-4 shrink-0" /><span className="flex-1">{n.label}</span>{active && <ChevronRight className="h-3.5 w-3.5 opacity-80" />}
           </Link>
         );
       })}
       {admin.data && (
-        <Link to="/admin" onClick={() => setOpen(false)} className={`mt-4 flex items-center gap-3 rounded-md px-3 py-2 text-sm ${path.startsWith("/admin") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-border"}`}>
+        <Link to="/admin" onClick={() => setOpen(false)} className={`mt-4 flex items-center gap-3 rounded-lg border border-cyan/20 px-3 py-2.5 text-sm ${path.startsWith("/admin") ? "bg-cyan/15 text-white" : "bg-white/[0.03] text-cyan hover:bg-cyan/10"}`}>
           <Shield className="h-4 w-4" />Administração Nexora
         </Link>
       )}
@@ -69,7 +69,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const sidebar = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="p-5"><Logo /></div>
+      <div className="relative overflow-hidden border-b border-sidebar-border px-5 py-6">
+        <div className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-cyan/10 blur-2xl" />
+        <div className="relative"><Logo /></div>
+        <div className="relative mt-5 flex items-center gap-2 rounded-lg border border-sidebar-border bg-white/[0.04] px-3 py-2">
+          <span className="grid h-7 w-7 place-items-center rounded-md bg-brand-gradient text-white"><Sparkles className="h-3.5 w-3.5" /></span>
+          <div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan">Business Suite</p><p className="truncate text-xs text-sidebar-foreground/70">Inteligência para gerir melhor</p></div>
+        </div>
+      </div>
       {memberships.length > 0 && (
         <div className="px-3">
           <Select value={current?.organization_id} onValueChange={(v) => { setOrgId(v); navigate({ to: "/app" }); }}>
@@ -81,7 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
       <div className="flex-1 overflow-y-auto">{nav}</div>
-      <div className="border-t border-sidebar-border p-4 text-xs">
+      <div className="border-t border-sidebar-border bg-black/10 p-4 text-xs">
         <div className="truncate text-sidebar-accent-foreground">{session?.user.email}</div>
         {current && <div className="mt-0.5 text-sidebar-foreground/60">{ROLE_LABELS[current.role]}</div>}
         <button onClick={() => supabase.auth.signOut().then(() => navigate({ to: "/auth" }))} className="mt-3 flex items-center gap-2 hover:text-sidebar-accent-foreground">
@@ -105,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {current?.organizations?.status === "suspended" && (
           <div className="bg-destructive px-4 py-2 text-sm text-destructive-foreground">Esta organização está suspensa. Os dados estão em modo de leitura.</div>
         )}
-        <main className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">{children}</main>
+        <main className="nexora-workspace mx-auto w-full max-w-[1600px] flex-1 p-4 md:p-8 lg:p-9">{children}</main>
       </div>
     </div>
   );
