@@ -113,3 +113,51 @@
 @utility num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 @utility bg-brand-gradient { background-image: var(--gradient-brand); }
 @utility bg-brand-dark { background-image: var(--gradient-dark); }
+
+
+/* Nexora premium workspace layer — editorial hierarchy, quiet depth and deliberate surfaces */
+@layer base {
+  body {
+    background-image:
+      radial-gradient(ellipse at 88% 0%, oklch(0.91 0.055 245 / 30%), transparent 34rem),
+      linear-gradient(180deg, oklch(0.982 0.008 245), oklch(0.965 0.012 250));
+    background-attachment: fixed;
+  }
+  ::selection { background: oklch(0.78 0.15 225 / 38%); color: #06142e; }
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+}
+.nexora-workspace {
+  position: relative;
+  isolation: isolate;
+}
+.nexora-workspace::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto auto;
+  width: min(38vw, 34rem);
+  height: 20rem;
+  background: radial-gradient(ellipse, oklch(0.78 0.15 225 / 9%), transparent 68%);
+  pointer-events: none;
+  z-index: -1;
+}
+.nexora-workspace h1 { color: #0a1c3b; font-weight: 700; letter-spacing: -0.04em; }
+.nexora-workspace h2 { color: #10264a; font-weight: 650; }
+.nexora-workspace [class~="rounded-lg"][class~="border"][class~="bg-card"],
+.nexora-workspace [class~="rounded-xl"][class~="border"][class~="bg-card"] {
+  box-shadow: 0 8px 26px -20px rgba(6, 20, 46, .28), 0 1px 2px rgba(6, 20, 46, .025);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.nexora-workspace [class~="overflow-x-auto"][class~="rounded-lg"][class~="border"] {
+  border-color: oklch(0.89 0.025 250);
+  box-shadow: 0 12px 32px -26px rgba(6, 20, 46, .34);
+}
+.nexora-workspace table thead { background: linear-gradient(90deg, #edf4ff, #f5f9ff); }
+.nexora-workspace table thead th { color: #415777; font-weight: 700; letter-spacing: .09em; }
+.nexora-workspace table tbody tr { transition: background-color .15s ease; }
+.nexora-workspace table tbody tr:hover { background-color: rgba(7, 87, 201, .035); }
+.nexora-workspace input, .nexora-workspace textarea, .nexora-workspace [role="combobox"] {
+  border-color: oklch(0.87 0.025 250);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
