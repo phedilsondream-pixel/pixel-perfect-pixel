@@ -161,3 +161,30 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+
+.nexora-hero {
+  background:
+    radial-gradient(ellipse at 90% 10%, rgba(18, 200, 255, .28), transparent 32%),
+    radial-gradient(ellipse at 70% 100%, rgba(7, 120, 249, .3), transparent 38%),
+    linear-gradient(118deg, #06142e 0%, #0a2550 52%, #0b3c78 100%);
+  border: 1px solid rgba(125, 190, 255, .22);
+}
+.nexora-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: .16;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.11) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.11) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(110deg, transparent, #000 65%, transparent);
+}
+.nexora-hero-orb {
+  position: absolute;
+  border-radius: 9999px;
+  border: 1px solid rgba(133, 213, 255, .2);
+  pointer-events: none;
+}
+.nexora-hero-orb-one { width: 19rem; height: 19rem; right: -3rem; top: -11rem; box-shadow: 0 0 0 2.2rem rgba(18,200,255,.025), 0 0 0 4.5rem rgba(18,200,255,.02); }
+.nexora-hero-orb-two { width: 12rem; height: 12rem; right: 16%; bottom: -10rem; box-shadow: 0 0 0 2rem rgba(18,200,255,.025); }
