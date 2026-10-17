@@ -136,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/app/faturacao/': typeof AuthenticatedAppFaturacaoIndexRoute
 }
 export interface FileRoutesByTo {
+  '/app/inventario': typeof AuthenticatedAppInventarioRoute
   '/app/suporte': typeof AuthenticatedAppSuporteRoute
   '/app/vendas': typeof AuthenticatedAppVendasRoute
   '/': typeof IndexRoute
@@ -201,6 +202,7 @@ export interface FileRouteTypes {
     | '/app/clientes'
     | '/app/vendas'
     | '/app/suporte'
+    | '/app/inventario'
     | '/app/equipa'
     | '/app/financas'
     | '/app/modulos'
