@@ -28,7 +28,7 @@ export const PLATFORMS: SuitePlatform[] = [
     name: "Nexora Sales & Customer Experience",
     description: "Clientes, CRM, oportunidades comerciais, campanhas e atendimento.",
     status: "partial",
-    to: "/app/clientes",
+    to: "/app/vendas",
     includes: ["Vendas, clientes e CRM", "Suporte, tickets e atendimento", "Marketing e campanhas", "Comércio eletrónico e catálogo"],
   },
   {
