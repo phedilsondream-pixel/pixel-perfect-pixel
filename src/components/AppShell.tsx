@@ -126,7 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="nexora-workspace nexora-page-grid mx-auto w-full max-w-[1600px] flex-1 p-4 md:p-6 lg:p-8">
           <div className="nexora-brand-ribbon relative mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-xl px-5 py-4 md:px-6">
             <div className="relative z-10 flex min-w-0 items-center gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan/30 bg-blue-500/15 text-cyan shadow-[0_0_22px_rgba(0,153,255,.14)]"><Logo /></div>
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan/30 bg-blue-500/15 text-cyan shadow-[0_0_22px_rgba(0,153,255,.14)]"><Sparkles className="h-5 w-5" /></div>
               <div className="min-w-0">
                 <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-cyan">Nexora Business Suite</p>
                 <p className="mt-1 text-sm font-semibold text-white md:text-base">Gestão integrada. Decisões inteligentes. Crescimento sustentável.</p>
