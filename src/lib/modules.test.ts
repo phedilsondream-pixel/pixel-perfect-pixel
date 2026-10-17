@@ -23,7 +23,7 @@ describe("Nexora platform catalogue", () => {
 
   it("only links existing first-phase areas for live or partial platforms", () => {
     expect(PLATFORMS.find((platform) => platform.id === "finance")?.to).toBe("/app/financas");
-    expect(PLATFORMS.find((platform) => platform.id === "sales-cx")?.to).toBe("/app/clientes");
+    expect(PLATFORMS.find((platform) => platform.id === "sales-cx")?.to).toBe("/app/vendas");
     expect(PLATFORMS.filter((platform) => platform.to).every((platform) => platform.status !== "planned")).toBe(true);
   });
 
