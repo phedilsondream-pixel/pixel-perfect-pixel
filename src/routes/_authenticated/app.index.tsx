@@ -5,6 +5,7 @@ import { useOrg, FINANCE_READ } from "@/lib/org";
 import { PageHeader, Empty } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { formatKz, formatDate, INVOICE_STATUS, SUB_STATUS } from "@/lib/format";
+import { ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Painel — Nexora" }, { name: "description", content: "Indicadores da sua empresa." }, { property: "og:title", content: "Painel — Nexora" }, { property: "og:description", content: "Indicadores da sua empresa." }] }),
@@ -43,6 +44,23 @@ function Dashboard() {
     <>
       <PageHeader title={current?.organizations?.name ?? "Painel"} description={sub ? `Plano ${sub.plans?.name} · ${SUB_STATUS[sub.status]}${sub.status === "trial" ? ` até ${formatDate(sub.trial_ends_at)}` : ""}` : undefined}
         actions={<Button asChild variant="copper"><Link to="/app/faturacao" search={{ novo: true }}>Novo documento</Link></Button>} />
+      <section className="nexora-hero relative mb-7 overflow-hidden rounded-2xl p-6 text-white shadow-xl md:p-8">
+        <div className="nexora-hero-orb nexora-hero-orb-one" />
+        <div className="nexora-hero-orb nexora-hero-orb-two" />
+        <div className="relative z-10 grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+          <div className="max-w-2xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-100">
+              <Sparkles className="h-3.5 w-3.5" /> Nexora Executive Workspace
+            </div>
+            <h2 className="max-w-xl text-2xl font-bold leading-tight text-white md:text-3xl">Clareza para decidir. Controlo para crescer.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-blue-100/85">Acompanhe a saúde financeira e a operação da sua empresa num espaço de gestão integrado, seguro e preparado para crescer consigo.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="secondary" className="border border-white/15 bg-white text-slate-900 hover:bg-sky-50"><Link to="/app/financas"><ShieldCheck className="mr-2 h-4 w-4" />Ver finanças <ArrowUpRight className="ml-2 h-4 w-4" /></Link></Button>
+            <Button asChild variant="outline" className="border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white"><Link to="/app/modulos">Explorar plataformas</Link></Button>
+          </div>
+        </div>
+      </section>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {finance && <Kpi label="Saldo em contas" value={formatKz(cash)} />}
         {finance && <Kpi label="Entradas do mês" value={formatKz(income)} />}
@@ -70,7 +88,7 @@ function Dashboard() {
 
 function Kpi({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-lg border bg-card p-5 shadow-soft">
+    <div className="relative overflow-hidden rounded-xl border bg-card p-5 shadow-soft before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-gradient-to-b before:from-blue-600 before:to-cyan">
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="num mt-2 text-xl font-medium">{value}</div>
       {hint && <div className="mt-1 text-xs text-destructive">{hint}</div>}

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { LayoutDashboard, Wallet, FileText, Users, ShieldCheck, Cloud, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/lib/session";
-import { MODULES } from "@/lib/modules";
+import { PLATFORMS, PLATFORM_STATUS_LABEL } from "@/lib/modules";
 import { Logo } from "@/components/Logo";
 import footerBg from "@/assets/footer-tech.svg";
 import authBg from "@/assets/auth-tech.svg";
@@ -56,14 +56,15 @@ function Index() {
       </section>
 
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <h2 className="text-2xl font-bold">Os 24 módulos da suite</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Os módulos disponíveis já funcionam. Os restantes chegam em fases.</p>
+        <h2 className="text-2xl font-bold">As 10 plataformas integradas</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Uma suite empresarial integrada, com o estado real de implementação apresentado sem promessas falsas.</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {MODULES.map((m) => (
-            <div key={m.n} className={`rounded-lg border bg-card p-4 ${m.status === "live" ? "" : "border-dashed"}`}>
-              <div className="num text-xs text-muted-foreground">{String(m.n).padStart(2, "0")}</div>
-              <div className="mt-1 text-sm font-medium">{m.name}</div>
-              <div className={`mt-2 text-xs font-medium ${m.status === "live" ? "text-primary" : "text-muted-foreground"}`}>{m.status === "live" ? "Disponível" : "Próxima fase"}</div>
+          {PLATFORMS.map((platform, index) => (
+            <div key={platform.id} className={`rounded-lg border bg-card p-4 ${platform.status === "live" ? "" : "border-dashed"}`}>
+              <div className="num text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</div>
+              <div className="mt-1 text-sm font-medium">{platform.name}</div>
+              <p className="mt-1 text-xs text-muted-foreground">{platform.description}</p>
+              <div className={`mt-2 text-xs font-medium ${platform.status === "live" ? "text-primary" : "text-muted-foreground"}`}>{PLATFORM_STATUS_LABEL[platform.status]}</div>
             </div>
           ))}
         </div>
