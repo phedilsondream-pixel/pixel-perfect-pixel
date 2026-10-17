@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu, Sparkles, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu, Sparkles, ChevronRight, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg, FINANCE_READ } from "@/lib/org";
 import { useSession } from "@/lib/session";
@@ -19,6 +19,7 @@ const NAV = [
   { to: "/app/financas", label: "Finanças", icon: Wallet, roles: FINANCE_READ },
   { to: "/app/faturacao", label: "Faturação", icon: FileText, roles: null },
   { to: "/app/clientes", label: "Clientes", icon: Users, roles: null },
+  { to: "/app/vendas", label: "Pipeline comercial", icon: TrendingUp, roles: ["owner", "admin", "director", "manager", "supervisor", "sales", "accountant", "auditor"] },
   { to: "/app/equipa", label: "Equipa", icon: UserCog, roles: null },
   { to: "/app/planos", label: "Plano e assinatura", icon: CreditCard, roles: null },
   { to: "/app/auditoria", label: "Auditoria", icon: ScrollText, roles: ["owner", "admin", "director", "auditor", "accountant"] },
