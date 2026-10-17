@@ -19,6 +19,7 @@ import { Route as AuthenticatedAppAuditoriaRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/app.clientes'
 import { Route as AuthenticatedAppVendasRouteImport } from './routes/_authenticated/app.vendas'
 import { Route as AuthenticatedAppSuporteRouteImport } from './routes/_authenticated/app.suporte'
+import { Route as AuthenticatedAppInventarioRouteImport } from './routes/_authenticated/app.inventario'
 import { Route as AuthenticatedAppEquipaRouteImport } from './routes/_authenticated/app.equipa'
 import { Route as AuthenticatedAppFinancasRouteImport } from './routes/_authenticated/app.financas'
 import { Route as AuthenticatedAppModulosRouteImport } from './routes/_authenticated/app.modulos'
@@ -67,6 +68,11 @@ const AuthenticatedAppClientesRoute =
     path: '/app/clientes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAppInventarioRoute = AuthenticatedAppInventarioRouteImport.update({
+  id: '/app/inventario',
+  path: '/app/inventario',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppSuporteRoute = AuthenticatedAppSuporteRouteImport.update({
   id: '/app/suporte',
   path: '/app/suporte',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/app/clientes': typeof AuthenticatedAppClientesRoute
   '/app/vendas': typeof AuthenticatedAppVendasRoute
   '/app/suporte': typeof AuthenticatedAppSuporteRoute
+  '/app/inventario': typeof AuthenticatedAppInventarioRoute
   '/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/app/financas': typeof AuthenticatedAppFinancasRoute
   '/app/modulos': typeof AuthenticatedAppModulosRoute
@@ -156,6 +163,7 @@ export interface FileRoutesById {
   '/_authenticated/app/clientes': typeof AuthenticatedAppClientesRoute
   '/_authenticated/app/vendas': typeof AuthenticatedAppVendasRoute
   '/_authenticated/app/suporte': typeof AuthenticatedAppSuporteRoute
+  '/_authenticated/app/inventario': typeof AuthenticatedAppInventarioRoute
   '/_authenticated/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/_authenticated/app/financas': typeof AuthenticatedAppFinancasRoute
   '/_authenticated/app/modulos': typeof AuthenticatedAppModulosRoute
@@ -175,6 +183,7 @@ export interface FileRouteTypes {
     | '/app/clientes'
     | '/app/vendas'
     | '/app/suporte'
+    | '/app/inventario'
     | '/app/equipa'
     | '/app/financas'
     | '/app/modulos'
@@ -282,11 +291,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/app/suporte': {
-      id: '/_authenticated/app/suporte'
-      path: '/app/suporte'
-      fullPath: '/app/suporte'
-      preLoaderRoute: typeof AuthenticatedAppSuporteRouteImport
+    '/_authenticated/app/inventario': {
+      id: '/_authenticated/app/inventario'
+      path: '/app/inventario'
+      fullPath: '/app/inventario'
+      preLoaderRoute: typeof AuthenticatedAppInventarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/suporte': {
