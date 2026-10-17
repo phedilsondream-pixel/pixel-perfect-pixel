@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu, Sparkles, ChevronRight, TrendingUp, Headphones, Package } from "lucide-react";
+import { LayoutDashboard, Wallet, FileText, Users, UserCog, CreditCard, ScrollText, Grid3x3, Shield, LogOut, Menu, Sparkles, ChevronRight, TrendingUp, Headphones, Package, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg, FINANCE_READ } from "@/lib/org";
 import { useSession } from "@/lib/session";
@@ -22,6 +22,7 @@ const NAV = [
   { to: "/app/vendas", label: "Pipeline comercial", icon: TrendingUp, roles: ["owner", "admin", "director", "manager", "supervisor", "sales", "accountant", "auditor"] },
   { to: "/app/suporte", label: "Atendimento e suporte", icon: Headphones, roles: ["owner", "admin", "director", "manager", "supervisor", "operator", "employee", "sales", "support", "auditor"] },
   { to: "/app/inventario", label: "Inventário e stock", icon: Package, roles: ["owner", "admin", "director", "manager", "supervisor", "operator"] },
+  { to: "/app/departamentos", label: "Plataformas departamentais", icon: Building2, roles: null },
   { to: "/app/equipa", label: "Equipa", icon: UserCog, roles: null },
   { to: "/app/planos", label: "Plano e assinatura", icon: CreditCard, roles: null },
   { to: "/app/auditoria", label: "Auditoria", icon: ScrollText, roles: ["owner", "admin", "director", "auditor", "accountant"] },
