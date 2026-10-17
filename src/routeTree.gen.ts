@@ -157,7 +157,6 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
@@ -165,7 +164,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app/auditoria'
     | '/app/clientes'
-    | '/app/vendas'
     | '/app/vendas'
     | '/app/equipa'
     | '/app/financas'
@@ -182,6 +180,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app/auditoria'
     | '/app/clientes'
+    | '/app/vendas'
     | '/app/equipa'
     | '/app/financas'
     | '/app/modulos'
