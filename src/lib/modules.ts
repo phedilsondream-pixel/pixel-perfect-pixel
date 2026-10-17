@@ -42,8 +42,9 @@ export const PLATFORMS: SuitePlatform[] = [
     id: "supply",
     name: "Nexora Supply",
     description: "Inventário, armazéns, compras, fornecedores e movimentações de stock.",
-    status: "planned",
-    includes: ["Gestão de stocks e armazéns", "Compras e fornecedores"],
+    status: "partial",
+    to: "/app/inventario",
+    includes: ["Catálogo de artigos e níveis de stock", "Movimentos de entrada, saída e ajuste", "Compras e fornecedores (por implementar)"],
   },
   {
     id: "projects-services",
