@@ -188,3 +188,134 @@
 }
 .nexora-hero-orb-one { width: 19rem; height: 19rem; right: -3rem; top: -11rem; box-shadow: 0 0 0 2.2rem rgba(18,200,255,.025), 0 0 0 4.5rem rgba(18,200,255,.02); }
 .nexora-hero-orb-two { width: 12rem; height: 12rem; right: 16%; bottom: -10rem; box-shadow: 0 0 0 2rem rgba(18,200,255,.025); }
+
+
+/* =========================================================
+   NEXORA SIGNATURE UI — dark enterprise visual system
+   Inspired by the approved reference: midnight navy, electric
+   blue/cyan, luminous edges, restrained glass surfaces.
+   ========================================================= */
+:root {
+  color-scheme: dark;
+  --background: oklch(0.13 0.035 258);
+  --foreground: oklch(0.94 0.018 235);
+  --card: oklch(0.17 0.045 258);
+  --card-foreground: oklch(0.94 0.018 235);
+  --popover: oklch(0.16 0.045 258);
+  --popover-foreground: oklch(0.94 0.018 235);
+  --primary: oklch(0.66 0.19 245);
+  --primary-foreground: oklch(0.99 0.005 230);
+  --secondary: oklch(0.22 0.05 258);
+  --secondary-foreground: oklch(0.92 0.02 235);
+  --muted: oklch(0.2 0.04 258);
+  --muted-foreground: oklch(0.69 0.035 235);
+  --accent: oklch(0.25 0.075 240);
+  --accent-foreground: oklch(0.88 0.08 220);
+  --copper: oklch(0.66 0.19 245);
+  --copper-foreground: oklch(0.99 0.005 230);
+  --cyan: oklch(0.82 0.15 215);
+  --border: oklch(0.34 0.065 250 / 82%);
+  --input: oklch(0.24 0.05 258);
+  --ring: oklch(0.78 0.16 220);
+  --chart-1: oklch(0.72 0.18 240);
+  --chart-2: oklch(0.82 0.15 215);
+  --chart-3: oklch(0.76 0.16 175);
+  --chart-4: oklch(0.78 0.16 80);
+  --chart-5: oklch(0.62 0.17 280);
+  --sidebar: oklch(0.105 0.035 258);
+  --sidebar-foreground: oklch(0.84 0.025 235);
+  --sidebar-primary: oklch(0.76 0.17 225);
+  --sidebar-primary-foreground: oklch(0.99 0.005 230);
+  --sidebar-accent: oklch(0.24 0.07 245);
+  --sidebar-accent-foreground: oklch(0.96 0.02 230);
+  --sidebar-border: oklch(0.29 0.06 250);
+  --sidebar-ring: oklch(0.78 0.16 220);
+  --shadow-soft: 0 12px 32px rgba(0, 7, 22, .28);
+  --gradient-brand: linear-gradient(120deg, #0878f9 0%, #0868d9 48%, #12c8ff 100%);
+  --gradient-dark: linear-gradient(135deg, #030a18 0%, #061b3b 58%, #07386c 100%);
+}
+@layer base {
+  html { background: #050d1e; }
+  body {
+    color: #e8f4ff;
+    background:
+      radial-gradient(ellipse at 78% -10%, rgba(0, 153, 255, .12), transparent 36rem),
+      radial-gradient(ellipse at 4% 50%, rgba(0, 210, 255, .045), transparent 30rem),
+      linear-gradient(180deg, #071329 0%, #050d1e 100%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 { color: #f1f8ff; }
+  ::selection { background: rgba(18, 200, 255, .35); color: #fff; }
+}
+.nexora-workspace {
+  color: #e5f1ff;
+  background: linear-gradient(180deg, rgba(4, 14, 32, .18), rgba(4, 14, 32, .04));
+}
+.nexora-workspace h1, .nexora-workspace h2, .nexora-workspace h3 { color: #f2f8ff; }
+.nexora-workspace p, .nexora-workspace label { text-wrap: pretty; }
+.nexora-workspace [class~="bg-card"],
+.nexora-workspace [class~="bg-popover"] {
+  background-color: rgba(7, 24, 51, .88);
+}
+.nexora-workspace [class~="border"] { border-color: rgba(38, 126, 207, .34); }
+.nexora-workspace [class~="rounded-lg"][class~="border"][class~="bg-card"],
+.nexora-workspace [class~="rounded-xl"][class~="border"][class~="bg-card"] {
+  background-image: linear-gradient(145deg, rgba(12, 38, 76, .76), rgba(5, 18, 40, .92));
+  box-shadow: inset 0 1px 0 rgba(160, 218, 255, .035), 0 12px 30px rgba(0, 4, 17, .18);
+  border-color: rgba(24, 130, 218, .38);
+}
+.nexora-workspace [class~="rounded-lg"][class~="border"][class~="bg-card"]:hover,
+.nexora-workspace [class~="rounded-xl"][class~="border"][class~="bg-card"]:hover {
+  border-color: rgba(18, 200, 255, .58);
+  box-shadow: inset 0 1px 0 rgba(160, 218, 255, .06), 0 14px 34px rgba(0, 8, 28, .28), 0 0 22px rgba(0, 145, 255, .06);
+}
+.nexora-workspace table thead { background: linear-gradient(90deg, #0b2850, #0b1c38); }
+.nexora-workspace table thead th { color: #9fc8ef; }
+.nexora-workspace table tbody tr:hover { background-color: rgba(0, 153, 255, .09); }
+.nexora-workspace input, .nexora-workspace textarea,
+.nexora-workspace [role="combobox"], .nexora-workspace select {
+  background-color: rgba(3, 13, 31, .82);
+  border-color: rgba(55, 137, 203, .42);
+  color: #edf7ff;
+}
+.nexora-workspace input::placeholder, .nexora-workspace textarea::placeholder { color: #7894b4; }
+.nexora-workspace [class~="bg-muted"] { background-color: rgba(18, 44, 78, .72); }
+.nexora-workspace [class~="text-foreground"] { color: #eaf5ff; }
+.nexora-workspace [class~="text-muted-foreground"] { color: #91aac7; }
+.nexora-workspace [class~="border-dashed"] { border-color: rgba(61, 140, 207, .42); }
+.nexora-workspace .nexora-brand-ribbon {
+  background:
+    radial-gradient(ellipse at 88% 15%, rgba(18, 200, 255, .22), transparent 28%),
+    linear-gradient(105deg, #06142e 0%, #09254b 60%, #07396a 100%);
+  border: 1px solid rgba(33, 154, 230, .48);
+  box-shadow: inset 0 1px 0 rgba(195, 232, 255, .09), 0 10px 28px rgba(0, 5, 20, .2);
+}
+.nexora-brand-ribbon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .16;
+  background-image: linear-gradient(rgba(130,210,255,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(130,210,255,.18) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(100deg, transparent, #000 65%, transparent);
+}
+.nexora-topbar {
+  background: rgba(3, 11, 27, .92);
+  border-bottom: 1px solid rgba(38, 126, 207, .35);
+  box-shadow: 0 8px 28px rgba(0, 4, 18, .16);
+  backdrop-filter: blur(18px);
+}
+.nexora-page-grid {
+  background-image: radial-gradient(rgba(76, 169, 238, .12) .7px, transparent .7px);
+  background-size: 22px 22px;
+}
+.nexora-workspace [class~="bg-white"] { background-color: #0b1e3a; color: #eaf5ff; }
+.nexora-workspace [class~="text-slate-900"] { color: #071329; }
+.nexora-workspace [class~="hover:bg-muted"]:hover { background-color: rgba(12, 53, 95, .82); }
+.nexora-workspace [class~="shadow-soft"] { box-shadow: 0 12px 32px rgba(0, 4, 18, .26); }
+@media (max-width: 767px) {
+  .nexora-workspace { padding: 1rem; }
+  .nexora-brand-ribbon { padding: .85rem 1rem; }
+  .nexora-brand-ribbon .nexora-ribbon-detail { display: none; }
+}
