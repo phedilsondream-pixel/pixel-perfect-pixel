@@ -19,6 +19,22 @@ create index inventory_items_org_name_idx on public.inventory_items(organization
 create trigger inventory_items_touch before update on public.inventory_items for each row execute function public.touch_updated_at();
 create trigger inventory_items_audit after insert or update or delete on public.inventory_items for each row execute function public.audit_row();
 
+
+-- Prevent direct balance edits that would bypass the movement ledger.
+create or replace function public.guard_inventory_quantity_change()
+returns trigger language plpgsql set search_path = public as $
+begin
+  if new.quantity is distinct from old.quantity
+     and coalesce(current_setting('nexora.inventory_movement', true), '') <> 'on' then
+    raise exception using errcode = '42501', message = 'O stock só pode ser alterado através de um movimento de inventário';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists inventory_quantity_guard on public.inventory_items;
+create trigger inventory_quantity_guard before update of quantity on public.inventory_items
+for each row execute function public.guard_inventory_quantity_change();
+
 create table public.inventory_movements (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
@@ -38,7 +54,9 @@ create trigger inventory_movements_audit after insert or update or delete on pub
 
 alter table public.inventory_items enable row level security;
 alter table public.inventory_movements enable row level security;
-grant select, insert, update, delete on public.inventory_items, public.inventory_movements to authenticated;
+grant select, insert, update, delete on public.inventory_items to authenticated;
+grant select on public.inventory_movements to authenticated;
+revoke insert, update, delete on public.inventory_movements from authenticated;
 grant all on public.inventory_items, public.inventory_movements to service_role;
 
 create policy "inventory items read" on public.inventory_items for select to authenticated using (
@@ -62,11 +80,6 @@ create policy "inventory items delete" on public.inventory_items for delete to a
 create policy "inventory movements read" on public.inventory_movements for select to authenticated using (
   public.is_org_active_member(organization_id, auth.uid())
 );
-create policy "inventory movements create" on public.inventory_movements for insert to authenticated with check (
-  created_by = auth.uid() and public.is_org_active_member(organization_id, auth.uid())
-  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator']::public.org_role[])
-);
-
 create or replace function public.adjust_inventory_stock(
   p_item_id uuid,
   p_movement_type text,
@@ -76,9 +89,9 @@ create or replace function public.adjust_inventory_stock(
   p_notes text default null
 ) returns public.inventory_movements
 language plpgsql
-security invoker
+security definer
 set search_path = public
-as $$
+as $
 declare
   v_item public.inventory_items%rowtype;
   v_after numeric(16,3);
@@ -100,6 +113,8 @@ begin
   v_after := v_item.quantity + p_quantity_delta;
   if v_after < 0 then raise exception 'Stock insuficiente: a operação não pode deixar quantidade negativa'; end if;
 
+  -- Only this validated function may alter quantity; movement and balance stay atomic.
+  perform set_config('nexora.inventory_movement', 'on', true);
   update public.inventory_items set quantity = v_after, unit_cost = p_unit_cost where id = p_item_id;
   insert into public.inventory_movements(organization_id,item_id,movement_type,quantity_delta,quantity_after,unit_cost,reference,notes,created_by)
   values(v_item.organization_id,p_item_id,p_movement_type,p_quantity_delta,v_after,p_unit_cost,nullif(trim(p_reference),''),nullif(trim(p_notes),''),auth.uid())
