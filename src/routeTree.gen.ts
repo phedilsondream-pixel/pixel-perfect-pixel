@@ -308,13 +308,6 @@ declare module '@tanstack/react-router' {
       path: '/app/departamentos'
       fullPath: '/app/departamentos'
       preLoaderRoute: typeof AuthenticatedAppDepartamentosRouteImport
-      parentRoute: typeof AuthenticatedRouteRouteImport
-    }
-    '/_authenticated/app/inventario': {
-      id: '/_authenticated/app/inventario'
-      path: '/app/inventario'
-      fullPath: '/app/inventario'
-      preLoaderRoute: typeof AuthenticatedAppInventarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/inventario': {
@@ -384,6 +377,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppDepartamentosRoute: typeof AuthenticatedAppDepartamentosRoute
   AuthenticatedAppInventarioRoute: typeof AuthenticatedAppInventarioRoute
   AuthenticatedAppSuporteRoute: typeof AuthenticatedAppSuporteRoute
   AuthenticatedAppVendasRoute: typeof AuthenticatedAppVendasRoute
@@ -400,6 +394,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppDepartamentosRoute: AuthenticatedAppDepartamentosRoute,
   AuthenticatedAppInventarioRoute: AuthenticatedAppInventarioRoute,
   AuthenticatedAppSuporteRoute: AuthenticatedAppSuporteRoute,
   AuthenticatedAppVendasRoute: AuthenticatedAppVendasRoute,
