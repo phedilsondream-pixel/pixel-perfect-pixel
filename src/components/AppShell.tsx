@@ -102,17 +102,41 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 md:block">{sidebar}</aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b bg-card px-4 py-3 md:hidden">
+        <header className="nexora-topbar sticky top-0 z-30 flex items-center gap-3 px-4 py-3 md:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild><Button variant="ghost" size="icon" aria-label="Menu"><Menu /></Button></SheetTrigger>
+            <SheetTrigger asChild><Button variant="ghost" size="icon" aria-label="Abrir menu" className="text-cyan hover:bg-cyan/10"><Menu /></Button></SheetTrigger>
             <SheetContent side="left" className="w-64 border-0 p-0">{sidebar}</SheetContent>
           </Sheet>
-          <span className="font-display font-semibold">{current?.organizations?.name ?? "Nexora"}</span>
+          <div className="min-w-0 flex-1"><Logo /><p className="mt-1 truncate text-[10px] text-muted-foreground">{current?.organizations?.name ?? "Espaço de gestão"}</p></div>
+          <span className="rounded-full border border-cyan/25 bg-cyan/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-cyan">Suite</span>
+        </header>
+        <header className="nexora-topbar sticky top-0 z-30 hidden h-[66px] items-center justify-between gap-4 px-6 lg:flex">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="h-8 w-px bg-cyan/30" />
+            <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-100">{current?.organizations?.name ?? "Nexora Business Suite"}</p><p className="text-[10px] uppercase tracking-[0.2em] text-cyan">Espaço de trabalho empresarial</p></div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden rounded-lg border border-cyan/20 bg-white/[0.03] px-3 py-2 text-xs text-slate-300 xl:block"><span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_10px_rgba(18,200,255,.8)]" />Ambiente seguro · Dados da organização</div>
+            <div className="rounded-lg border border-blue-400/25 bg-blue-500/10 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-cyan">Nexora Suite</div>
+          </div>
         </header>
         {current?.organizations?.status === "suspended" && (
           <div className="bg-destructive px-4 py-2 text-sm text-destructive-foreground">Esta organização está suspensa. Os dados estão em modo de leitura.</div>
         )}
-        <main className="nexora-workspace mx-auto w-full max-w-[1600px] flex-1 p-4 md:p-8 lg:p-9">{children}</main>
+        <main className="nexora-workspace nexora-page-grid mx-auto w-full max-w-[1600px] flex-1 p-4 md:p-6 lg:p-8">
+          <div className="nexora-brand-ribbon relative mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-xl px-5 py-4 md:px-6">
+            <div className="relative z-10 flex min-w-0 items-center gap-3">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-cyan/30 bg-blue-500/15 text-cyan shadow-[0_0_22px_rgba(0,153,255,.14)]"><Logo /></div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-cyan">Nexora Business Suite</p>
+                <p className="mt-1 text-sm font-semibold text-white md:text-base">Gestão integrada. Decisões inteligentes. Crescimento sustentável.</p>
+                <p className="nexora-ribbon-detail mt-1 text-xs text-blue-100/75">Finanças · Pessoas · Operações · Clientes · Controlo empresarial</p>
+              </div>
+            </div>
+            <div className="nexora-ribbon-detail relative z-10 hidden shrink-0 text-right sm:block"><p className="text-[9px] uppercase tracking-[0.2em] text-blue-200">Tecnologia para empresas</p><p className="mt-1 text-xs font-semibold text-cyan">Um só espaço. Mais controlo.</p></div>
+          </div>
+          {children}
+        </main>
       </div>
     </div>
   );
