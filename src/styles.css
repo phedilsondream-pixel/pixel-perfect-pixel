@@ -310,7 +310,6 @@
   background-image: radial-gradient(rgba(76, 169, 238, .12) .7px, transparent .7px);
   background-size: 22px 22px;
 }
-.nexora-workspace [class~="bg-white"] { background-color: #0b1e3a; color: #eaf5ff; }
 .nexora-workspace [class~="text-slate-900"] { color: #071329; }
 .nexora-workspace [class~="hover:bg-muted"]:hover { background-color: rgba(12, 53, 95, .82); }
 .nexora-workspace [class~="shadow-soft"] { box-shadow: 0 12px 32px rgba(0, 4, 18, .26); }
