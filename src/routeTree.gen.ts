@@ -134,7 +134,6 @@ export interface FileRoutesByFullPath {
   '/app/suporte': typeof AuthenticatedAppSuporteRoute
   '/app/inventario': typeof AuthenticatedAppInventarioRoute
   '/app/departamentos': typeof AuthenticatedAppDepartamentosRoute
-  '/app/departamentos': typeof AuthenticatedAppDepartamentosRoute
   '/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/app/financas': typeof AuthenticatedAppFinancasRoute
   '/app/modulos': typeof AuthenticatedAppModulosRoute
@@ -144,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/app/faturacao/': typeof AuthenticatedAppFaturacaoIndexRoute
 }
 export interface FileRoutesByTo {
+  '/app/departamentos': typeof AuthenticatedAppDepartamentosRoute
   '/app/inventario': typeof AuthenticatedAppInventarioRoute
   '/app/suporte': typeof AuthenticatedAppSuporteRoute
   '/app/vendas': typeof AuthenticatedAppVendasRoute
