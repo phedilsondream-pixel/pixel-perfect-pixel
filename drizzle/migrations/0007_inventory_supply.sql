@@ -46,14 +46,14 @@ create policy "inventory items read" on public.inventory_items for select to aut
 );
 create policy "inventory items create" on public.inventory_items for insert to authenticated with check (
   created_by = auth.uid() and public.is_org_active_member(organization_id, auth.uid())
-  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator','warehouse']::public.org_role[])
+  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator']::public.org_role[])
 );
 create policy "inventory items update" on public.inventory_items for update to authenticated using (
   public.is_org_active_member(organization_id, auth.uid())
-  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator','warehouse']::public.org_role[])
+  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator']::public.org_role[])
 ) with check (
   public.is_org_active_member(organization_id, auth.uid())
-  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator','warehouse']::public.org_role[])
+  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator']::public.org_role[])
 );
 create policy "inventory items delete" on public.inventory_items for delete to authenticated using (
   public.is_org_active_member(organization_id, auth.uid())
@@ -64,7 +64,7 @@ create policy "inventory movements read" on public.inventory_movements for selec
 );
 create policy "inventory movements create" on public.inventory_movements for insert to authenticated with check (
   created_by = auth.uid() and public.is_org_active_member(organization_id, auth.uid())
-  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator','warehouse']::public.org_role[])
+  and public.has_org_role(organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator']::public.org_role[])
 );
 
 create or replace function public.adjust_inventory_stock(
@@ -94,7 +94,7 @@ begin
   select * into v_item from public.inventory_items where id = p_item_id for update;
   if not found then raise exception 'Artigo de inventário não encontrado'; end if;
   if not public.is_org_active_member(v_item.organization_id, auth.uid()) or not public.has_org_role(
-    v_item.organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator','warehouse']::public.org_role[]
+    v_item.organization_id, auth.uid(), array['owner','admin','director','manager','supervisor','operator']::public.org_role[]
   ) then raise exception using errcode = '42501', message = 'Sem permissão para movimentar este inventário'; end if;
 
   v_after := v_item.quantity + p_quantity_delta;
