@@ -17,6 +17,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAuditoriaRouteImport } from './routes/_authenticated/app.auditoria'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/app.clientes'
+import { Route as AuthenticatedAppVendasRouteImport } from './routes/_authenticated/app.vendas'
 import { Route as AuthenticatedAppEquipaRouteImport } from './routes/_authenticated/app.equipa'
 import { Route as AuthenticatedAppFinancasRouteImport } from './routes/_authenticated/app.financas'
 import { Route as AuthenticatedAppModulosRouteImport } from './routes/_authenticated/app.modulos'
@@ -65,6 +66,11 @@ const AuthenticatedAppClientesRoute =
     path: '/app/clientes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAppVendasRoute = AuthenticatedAppVendasRouteImport.update({
+  id: '/app/vendas',
+  path: '/app/vendas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppEquipaRoute = AuthenticatedAppEquipaRouteImport.update({
   id: '/app/equipa',
   path: '/app/equipa',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/app/vendas': typeof AuthenticatedAppVendasRoute
   '/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/app/financas': typeof AuthenticatedAppFinancasRoute
   '/app/modulos': typeof AuthenticatedAppModulosRoute
@@ -138,6 +145,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/_authenticated/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/_authenticated/app/vendas': typeof AuthenticatedAppVendasRoute
   '/_authenticated/app/equipa': typeof AuthenticatedAppEquipaRoute
   '/_authenticated/app/financas': typeof AuthenticatedAppFinancasRoute
   '/_authenticated/app/modulos': typeof AuthenticatedAppModulosRoute
@@ -258,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/app/clientes'
       fullPath: '/app/clientes'
       preLoaderRoute: typeof AuthenticatedAppClientesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/vendas': {
+      id: '/_authenticated/app/vendas'
+      path: '/app/vendas'
+      fullPath: '/app/vendas'
+      preLoaderRoute: typeof AuthenticatedAppVendasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/equipa': {
