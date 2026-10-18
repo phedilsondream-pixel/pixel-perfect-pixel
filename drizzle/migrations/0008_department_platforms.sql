@@ -169,7 +169,11 @@ begin
     execute format('alter table public.%I enable row level security', t);
     execute format('grant select, insert, update, delete on public.%I to authenticated', t);
     execute format('grant all on public.%I to service_role', t);
-    execute format('create policy %I on public.%I for select to authenticated using (public.is_org_active_member(organization_id, auth.uid()))', t || '_tenant_read', t);
+    if t in ('hr_employees','hr_leave_requests','education_students') then
+      execute format('create policy %I on public.%I for select to authenticated using (public.is_org_active_member(organization_id, auth.uid()) and public.has_org_role(organization_id, auth.uid(), array[''owner'',''admin'',''director'',''manager'',''accountant'',''auditor'',''employee'']::public.org_role[]))', t || '_tenant_read', t);
+    else
+      execute format('create policy %I on public.%I for select to authenticated using (public.is_org_active_member(organization_id, auth.uid()))', t || '_tenant_read', t);
+    end if;
     execute format('create policy %I on public.%I for insert to authenticated with check (created_by = auth.uid() and public.is_org_active_member(organization_id, auth.uid()) and public.has_org_role(organization_id, auth.uid(), array[''owner'',''admin'',''director'',''manager'',''supervisor'',''operator'',''employee'',''accountant'',''teacher'',''support'']::public.org_role[]))', t || '_tenant_insert', t);
     execute format('create policy %I on public.%I for update to authenticated using (public.is_org_active_member(organization_id, auth.uid()) and public.has_org_role(organization_id, auth.uid(), array[''owner'',''admin'',''director'',''manager'',''supervisor'',''operator'',''employee'',''accountant'',''teacher'',''support'']::public.org_role[])) with check (public.is_org_active_member(organization_id, auth.uid()) and public.has_org_role(organization_id, auth.uid(), array[''owner'',''admin'',''director'',''manager'',''supervisor'',''operator'',''employee'',''accountant'',''teacher'',''support'']::public.org_role[]))', t || '_tenant_update', t);
     execute format('create policy %I on public.%I for delete to authenticated using (public.is_org_active_member(organization_id, auth.uid()) and public.has_org_role(organization_id, auth.uid(), array[''owner'',''admin'']::public.org_role[]))', t || '_tenant_delete', t);
