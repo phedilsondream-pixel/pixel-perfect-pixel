@@ -57,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {NAV.filter((n) => !n.roles || can([...n.roles])).map((n) => {
         const active = n.to === "/app" ? path === "/app" : path.startsWith(n.to);
         return (
-          <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
+          <Link key={n.to} to={n.to as never} onClick={() => setOpen(false)}
             className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${active ? "bg-gradient-to-r from-blue-600/90 to-sky-500/80 text-white shadow-lg shadow-blue-950/20" : "text-sidebar-foreground/80 hover:bg-white/[0.06] hover:text-white"}`}>
             <n.icon className="h-4 w-4 shrink-0" /><span className="flex-1">{n.label}</span>{active && <ChevronRight className="h-3.5 w-3.5 opacity-80" />}
           </Link>
