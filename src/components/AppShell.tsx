@@ -23,7 +23,6 @@ const NAV = [
   { to: "/app/suporte", label: "Atendimento e suporte", icon: Headphones, roles: ["owner", "admin", "director", "manager", "supervisor", "operator", "employee", "sales", "support", "auditor"] },
   { to: "/app/inventario", label: "Inventário e stock", icon: Package, roles: ["owner", "admin", "director", "manager", "supervisor", "operator"] },
   { to: "/app/departamentos", label: "Plataformas departamentais", icon: Building2, roles: ["owner", "admin", "director", "manager", "supervisor", "operator", "employee", "accountant", "teacher", "support", "hr", "auditor", "sales"] },
-  { to: "/app/departamentos", label: "Plataformas departamentais", icon: Building2, roles: null },
   { to: "/app/equipa", label: "Equipa", icon: UserCog, roles: null },
   { to: "/app/planos", label: "Plano e assinatura", icon: CreditCard, roles: null },
   { to: "/app/auditoria", label: "Auditoria", icon: ScrollText, roles: ["owner", "admin", "director", "auditor", "accountant"] },
