@@ -22,7 +22,7 @@ create trigger inventory_items_audit after insert or update or delete on public.
 
 -- Prevent direct balance edits that would bypass the movement ledger.
 create or replace function public.guard_inventory_quantity_change()
-returns trigger language plpgsql set search_path = public as $
+returns trigger language plpgsql set search_path = public as $$
 begin
   if new.quantity is distinct from old.quantity
      and coalesce(current_setting('nexora.inventory_movement', true), '') <> 'on' then
@@ -30,7 +30,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 drop trigger if exists inventory_quantity_guard on public.inventory_items;
 create trigger inventory_quantity_guard before update of quantity on public.inventory_items
 for each row execute function public.guard_inventory_quantity_change();
@@ -91,7 +91,7 @@ create or replace function public.adjust_inventory_stock(
 language plpgsql
 security definer
 set search_path = public
-as $
+as $$
 declare
   v_item public.inventory_items%rowtype;
   v_after numeric(16,3);
