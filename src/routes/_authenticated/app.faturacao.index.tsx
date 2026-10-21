@@ -28,9 +28,14 @@ function Invoices() {
     queryKey: ["invoices", orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("invoices").select("id, number, doc_type, status, issue_date, due_date, total, amount_paid, customers(name)").eq("organization_id", orgId!).order("created_at", { ascending: false });
+      const { data, error } = await supabase.from("invoices").select("id, organization_id, customer_id, number, doc_type, status, issue_date, due_date, total, amount_paid, created_at").eq("organization_id", orgId!).order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      const customerIds = [...new Set((data ?? []).map((invoice) => invoice.customer_id).filter(Boolean))];
+      const { data: customers, error: customersError } = customerIds.length
+        ? await supabase.from("customers").select("id,name").in("id", customerIds)
+        : { data: [], error: null };
+      if (customersError) throw customersError;
+      return (data ?? []).map((invoice) => ({ ...invoice, customers: customers?.find((customer) => customer.id === invoice.customer_id) ?? null }));
     },
   });
   const list = (q.data ?? []).filter((i) => status === "all" || i.status === status);
