@@ -36,8 +36,9 @@ export function usePlatformAdmin() {
     queryKey: ["platform-admin", session?.user.id],
     enabled: !!session,
     queryFn: async () => {
-      const { data } = await supabase.from("platform_admins").select("user_id").eq("user_id", session!.user.id).maybeSingle();
-      return !!data;
+      const { data, error } = await supabase.rpc("is_my_global_admin");
+      if (error) throw error;
+      return data === true;
     },
   });
 }
@@ -67,9 +68,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (loading) return <div className="grid min-h-screen place-items-center text-muted-foreground">A carregar…</div>;
   if (!current && !path.startsWith("/admin")) return <Onboarding />;
 
-  const hasRouteEntitlement = (route: string) => route === "/app/clientes"
+  const hasRouteEntitlement = (route: string) => admin.data === true || (route === "/app/clientes"
     ? !!platformAccess.data?.some((code) => ["crm", "invoicing", "pos"].includes(code))
-    : !requiredPlatformByRoute[route] || !!platformAccess.data?.includes(requiredPlatformByRoute[route]);
+    : !requiredPlatformByRoute[route] || !!platformAccess.data?.includes(requiredPlatformByRoute[route]));
 
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
