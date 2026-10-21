@@ -43,18 +43,23 @@ function Modules() {
     queryKey: ["department-platform-catalog", orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const [subResult, catalogResult] = await Promise.all([
+      const [subResult, catalogResult, organizationResult] = await Promise.all([
         db.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id", orgId!).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         db.from("department_platforms").select("code,name,description,sort_order").eq("is_active", true).order("sort_order"),
+        db.from("organizations").select("trial_ends_at,status").eq("id", orgId!).maybeSingle(),
       ]);
       if (subResult.error) throw subResult.error;
       if (catalogResult.error) throw catalogResult.error;
+      if (organizationResult.error) throw organizationResult.error;
       const sub = subResult.data as Subscription | null;
+      const organization = organizationResult.data as { trial_ends_at: string | null; status: string } | null;
       const now = Date.now();
+      const trialEndsAt = sub?.trial_ends_at ?? organization?.trial_ends_at;
       const subscriptionActive = !!sub
         && ["active", "trial"].includes(sub.status)
         && (!sub.current_period_end || new Date(sub.current_period_end).getTime() >= now)
-        && (sub.status !== "trial" || !sub.trial_ends_at || new Date(sub.trial_ends_at).getTime() >= now);
+        && (sub.status !== "trial" || !trialEndsAt || new Date(trialEndsAt).getTime() >= now)
+        && !["cancelled", "canceled", "suspended", "deleted", "inactive"].includes(String(organization?.status ?? "").toLowerCase());
       if (!sub || !subscriptionActive) return { platforms: (catalogResult.data ?? []) as Platform[], enabled: [] as string[], subscriptionActive: false };
       const { data: entitlementRows, error: entitlementError } = await db.from("plan_platforms").select("platform_code").eq("plan_id", sub.plan_id).eq("enabled", true);
       if (entitlementError) throw entitlementError;
