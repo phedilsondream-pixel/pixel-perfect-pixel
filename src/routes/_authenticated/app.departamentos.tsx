@@ -59,10 +59,15 @@ function Departments() {
   queryKey:["department-platform-entitlements",orgId],
   enabled:!!orgId,
   queryFn:async()=>{
-   const {data:sub,error:subError}=await db.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id",orgId!).order("created_at",{ascending:false}).limit(1).maybeSingle();
+   const [{data:sub,error:subError},{data:organization,error:organizationError}]=await Promise.all([
+    db.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id",orgId!).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    db.from("organizations").select("trial_ends_at,status").eq("id",orgId!).maybeSingle()
+   ]);
    if(subError) throw subError;
+   if(organizationError) throw organizationError;
    const now=Date.now();
-   const activeSubscription=!!sub && ["active","trial"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime()>=now) && (sub.status!=="trial" || !sub.trial_ends_at || new Date(sub.trial_ends_at).getTime()>=now);
+   const trialEndsAt=sub?.trial_ends_at ?? organization?.trial_ends_at;
+   const activeSubscription=!!sub && ["active","trial"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime()>=now) && (sub.status!=="trial" || !trialEndsAt || new Date(trialEndsAt).getTime()>=now) && !["cancelled","canceled","suspended","deleted","inactive"].includes(String(organization?.status ?? "").toLowerCase());
    if(!sub || !activeSubscription) return [] as string[];
    const {data,error}=await db.from("plan_platforms").select("platform_code").eq("plan_id",sub.plan_id).eq("enabled",true);
    if(error) throw error;
