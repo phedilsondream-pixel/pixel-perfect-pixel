@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BriefcaseBusiness, GraduationCap, Hotel, Factory, Scale, Users, Wrench, Plus, RefreshCw } from "lucide-react";
@@ -155,6 +155,7 @@ function Departments() {
  const search = Route.useSearch();
  const requestedPlatform = platforms.find(p => p.id === search["platform"])?.id ?? platforms[0].id;
  const [active, setActive] = useState<string>(requestedPlatform);
+ useEffect(() => { setActive(requestedPlatform); }, [requestedPlatform]);
  const [formOpen, setFormOpen] = useState(false);
  const [form, setForm] = useState<Record<string,string>>({});
  const entitlementQuery = useQuery({
