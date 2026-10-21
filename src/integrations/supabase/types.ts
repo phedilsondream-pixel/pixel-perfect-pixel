@@ -158,6 +158,7 @@ export type Database = {
           line_tax: number | null
           organization_id: string
           quantity: number
+          product_id: string | null
           sort_order: number
           tax_rate: number
           unit_price: number
@@ -170,6 +171,7 @@ export type Database = {
           line_tax?: number | null
           organization_id: string
           quantity: number
+          product_id?: string | null
           sort_order?: number
           tax_rate?: number
           unit_price: number
@@ -182,6 +184,7 @@ export type Database = {
           line_tax?: number | null
           organization_id?: string
           quantity?: number
+          product_id?: string | null
           sort_order?: number
           tax_rate?: number
           unit_price?: number
@@ -200,6 +203,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_product_org_fkey"
+            columns: ["product_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id", "organization_id"]
           },
         ]
       }
