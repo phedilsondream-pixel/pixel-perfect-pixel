@@ -35,3 +35,9 @@ Consumo de material em projeto = movimento de stock + custo de projeto, nunca de
 - As migrations 0005 e 0006 são alterações de código, não prova de que foram aplicadas à base ativa. Não aplicar automaticamente sem ambiente de teste/backup e validação SQL.
 - A branch contém 16 commits à frente de `main` e 0 atrás. A `main` continua no SHA `636aa072f4eb387509eee79d213b68dfa39678ef`.
 - O projeto Lovable consultado continua a indicar esse SHA antigo; sincronização GitHub→Lovable não está confirmada. Não foi aplicado qualquer SQL à base ativa nem publicada a aplicação.
+
+
+## Correções de continuidade (22/10/2026)
+- Pipeline comercial: a tabela `sales_opportunities` estava ausente na base ativa, embora a página `/app/vendas` a consultasse. Foi criada com RLS e quatro políticas restritivas usando os helpers `private.nexora_*`; ver migration `0037_nexora_restore_sales_opportunities_pipeline.sql`.
+- Plataformas departamentais: a seleção inicial não acompanhava mudanças de `?platform=` enquanto a rota permanecia montada. O estado ativo agora sincroniza com o parâmetro da rota.
+- A tabela de oportunidades foi confirmada com 13 colunas, RLS ativo e quatro políticas. Falta teste E2E autenticado com utilizadores reais antes de declarar o pipeline validado integralmente.
