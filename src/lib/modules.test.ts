@@ -27,6 +27,19 @@ describe("Nexora platform catalogue", () => {
     expect(PLATFORMS.filter((platform) => platform.to).every((platform) => platform.status !== "planned")).toBe(true);
   });
 
+  it("routes each departmental platform to its own selected workspace", () => {
+    const departmental = PLATFORMS.filter((platform) => platform.to?.startsWith("/app/departamentos?"));
+    expect(departmental.length).toBe(7);
+    expect(new Set(departmental.map((platform) => platform.to)).size).toBe(7);
+    for (const platform of departmental) {
+      expect(platform.to).toContain("platform=");
+    }
+  });
+
+  it("does not label finance as fully available while production readiness is unverified", () => {
+    expect(PLATFORMS.find((platform) => platform.id === "finance")?.status).toBe("partial");
+  });
+
   it("gives every platform a description and at least one included capability", () => {
     for (const platform of PLATFORMS) {
       expect(platform.description.trim().length).toBeGreaterThan(0);
