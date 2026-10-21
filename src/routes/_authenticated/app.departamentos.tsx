@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/app/departamentos")({
 const db = supabase as any;
 const platformEntitlementCode: Record<string, string> = { hr_employees: "hr", business_projects: "projects", operations_work_orders: "operations", production_orders: "production", education_students: "education", hospitality_orders: "restaurant", legal_documents: "legal" };
 const platformReadRoles: Record<string, string[]> = {
- hr_employees: ["owner","admin","director","hr","hr_manager","hr_staff","employee"],
+ hr_employees: ["owner","admin","director","manager","hr","hr_manager","hr_staff","employee"],
  business_projects: ["owner","admin","director","manager","project_manager","employee","accountant","auditor","sales","support","operator","supervisor","teacher"],
  operations_work_orders: ["owner","admin","director","manager","operations","operations_manager","supervisor","operator"],
  production_orders: ["owner","admin","director","manager","production","production_manager","operator"],
