@@ -55,7 +55,7 @@ function InvoiceDetail() {
     e.preventDefault();
     const quantity = Number(line.quantity), unit_price = Number(line.unit_price), tax_rate = Number(line.tax_rate);
     if (!(quantity > 0) || !(unit_price >= 0) || !(tax_rate >= 0 && tax_rate <= 100)) return toast.error("Valores inválidos.");
-    const { error } = await supabase.from("invoice_items").insert({ invoice_id: id, organization_id: orgId!, description: line.description.trim(), quantity, unit_price, tax_rate, sort_order: items.length });
+    const { error } = await supabase.from("invoice_items").insert({ invoice_id: id, organization_id: orgId!, description: line.description.trim(), quantity, unit_price, tax_rate, sort_order: Math.max(-1, ...items.map((item) => Number(item.sort_order ?? -1))) + 1 });
     if (error) return toast.error(errMsg(error));
     setLine({ ...line, description: "", unit_price: "", quantity: "1" });
     refresh();
