@@ -13,6 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatKz, formatDate, errMsg, DOC_TYPES, INVOICE_STATUS, lineTotals } from "@/lib/format";
 
+// Product catalogue columns were added by the current database migrations.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+type ProductOption = { id: string; name: string; sku: string | null; price: number | null; unit: string | null };
+
 export const Route = createFileRoute("/_authenticated/app/faturacao/$id")({
   head: () => ({ meta: [{ title: "Documento — Nexora" }, { name: "description", content: "Detalhe do documento comercial." }, { property: "og:title", content: "Documento — Nexora" }, { property: "og:description", content: "Detalhe do documento comercial." }] }),
   component: InvoiceDetail,
@@ -43,9 +48,9 @@ function InvoiceDetail() {
     queryKey: ["invoice-products", orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("id,name,sku,price,unit").eq("organization_id", orgId!).eq("is_active", true).order("name");
+      const { data, error } = await db.from("products").select("id,name,sku,price,unit").eq("organization_id", orgId!).eq("is_active", true).order("name");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as ProductOption[];
     },
   });
   const refresh = () => { qc.invalidateQueries({ queryKey: ["invoice", id] }); qc.invalidateQueries({ queryKey: ["invoices"] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); };
