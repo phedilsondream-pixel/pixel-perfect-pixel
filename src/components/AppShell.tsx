@@ -14,6 +14,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ROLE_LABELS, errMsg } from "@/lib/format";
 
+const requiredPlatformByRoute: Record<string, string> = { "/app/financas": "finance", "/app/faturacao": "invoicing", "/app/clientes": "crm", "/app/vendas": "crm", "/app/suporte": "support", "/app/inventario": "inventory" };
+
 const NAV = [
   { to: "/app", label: "Painel", icon: LayoutDashboard, roles: null },
   { to: "/app/financas", label: "Finanças", icon: Wallet, roles: FINANCE_READ },
@@ -46,6 +48,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const admin = usePlatformAdmin();
+  const platformAccess = useQuery({
+    queryKey: ["organization-platform-access", current?.organization_id],
+    enabled: !!current?.organization_id,
+    queryFn: async () => {
+      const { data: sub, error: subError } = await supabase.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id", current!.organization_id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (subError) throw subError;
+      const now = Date.now();
+      const active = !!sub && ["active", "trial"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime() >= now) && (sub.status !== "trial" || !sub.trial_ends_at || new Date(sub.trial_ends_at).getTime() >= now);
+      if (!sub || !active) return [] as string[];
+      const { data, error } = await supabase.from("plan_platforms").select("platform_code").eq("plan_id", sub.plan_id).eq("enabled", true);
+      if (error) throw error;
+      return (data ?? []).map((row) => row.platform_code);
+    },
+  });
   const [open, setOpen] = useState(false);
 
   if (loading) return <div className="grid min-h-screen place-items-center text-muted-foreground">A carregar…</div>;
@@ -53,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV.filter((n) => !n.roles || can([...n.roles])).map((n) => {
+      {NAV.filter((n) => (!n.roles || can([...n.roles])) && (!requiredPlatformByRoute[n.to] || platformAccess.data?.includes(requiredPlatformByRoute[n.to]))).map((n) => {
         const active = n.to === "/app" ? path === "/app" : path.startsWith(n.to);
         return (
           <Link key={n.to} to={n.to as never} onClick={() => setOpen(false)}
