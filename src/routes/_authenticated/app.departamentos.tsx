@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/app/departamentos")({
 // The tables are introduced by migration 0008_department_platforms.sql.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
+const platformEntitlementCode: Record<string, string> = { hr_employees: "hr", business_projects: "projects", operations_work_orders: "operations", production_orders: "production", education_students: "education", hospitality_orders: "restaurant", legal_documents: "legal" };
 const platforms = [
  { id:"hr_employees", title:"Recursos Humanos", table:"hr_employees", icon:Users, name:"full_name", code:"employee_number", status:"employment_status", statuses:["active","leave","suspended","terminated"], fields:[["employee_number","N.º funcionário"],["full_name","Nome completo"],["work_email","Email profissional"],["phone","Telefone"],["department","Departamento"],["job_title","Cargo"],["hire_date","Data de admissão"]] },
  { id:"business_projects", title:"Projetos", table:"business_projects", icon:BriefcaseBusiness, name:"name", code:"code", status:"status", statuses:["planned","active","on_hold","completed","cancelled"], fields:[["code","Código"],["name","Nome do projeto"],["description","Descrição"],["start_date","Data de início"],["due_date","Prazo"],["budget","Orçamento"]] },
@@ -36,11 +37,26 @@ function Departments() {
  const [active, setActive] = useState<string>(platforms[0].id);
  const [formOpen, setFormOpen] = useState(false);
  const [form, setForm] = useState<Record<string,string>>({});
- const platform = useMemo(() => platforms.find(p => p.id === active) ?? platforms[0], [active]);
+ const entitlementQuery = useQuery({
+  queryKey:["department-platform-entitlements",orgId],
+  enabled:!!orgId,
+  queryFn:async()=>{
+   const {data:sub,error:subError}=await db.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id",orgId!).order("created_at",{ascending:false}).limit(1).maybeSingle();
+   if(subError) throw subError;
+   const now=Date.now();
+   const activeSubscription=!!sub && ["active","trial"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime()>=now) && (sub.status!=="trial" || !sub.trial_ends_at || new Date(sub.trial_ends_at).getTime()>=now);
+   if(!sub || !activeSubscription) return [] as string[];
+   const {data,error}=await db.from("plan_platforms").select("platform_code").eq("plan_id",sub.plan_id).eq("enabled",true);
+   if(error) throw error;
+   return (data??[]).map((row:{platform_code:string})=>row.platform_code) as string[];
+  }
+ });
+ const availablePlatforms = useMemo(() => platforms.filter(p => entitlementQuery.data?.includes(platformEntitlementCode[p.id]) || (p.id==="hospitality_orders" && (entitlementQuery.data?.includes("restaurant") || entitlementQuery.data?.includes("pos")))), [entitlementQuery.data]);
+ const platform = useMemo(() => availablePlatforms.find(p => p.id === active) ?? availablePlatforms[0] ?? platforms[0], [availablePlatforms,active]);
  const writable = can(["owner","admin","director","manager","supervisor","operator","employee","accountant","teacher","support"]);
  const query = useQuery({
   queryKey:["department-records",orgId,platform.table],
-  enabled:!!orgId,
+  enabled:!!orgId && availablePlatforms.some(p=>p.id===platform.id),
   queryFn:async()=>{ const {data,error}=await db.from(platform.table).select("*").eq("organization_id",orgId).order("created_at",{ascending:false}).limit(250); if(error) throw error; return data ?? []; }
  });
  async function createRecord() {
@@ -60,11 +76,14 @@ function Departments() {
   toast.success("Estado atualizado."); qc.invalidateQueries({queryKey:["department-records",orgId]});
  }
  if(!can(["owner","admin","director","manager","supervisor","operator","employee","accountant","teacher","support","auditor","sales"])) return <NoAccess />;
+ if(entitlementQuery.isLoading) return <div className="grid min-h-48 place-items-center text-sm text-muted-foreground">A verificar as plataformas incluídas na assinatura…</div>;
+ if(entitlementQuery.isError) return <div className="rounded-lg border border-destructive/30 bg-card p-6 text-sm text-destructive">Não foi possível verificar as permissões da assinatura. Tente novamente.</div>;
+ if(availablePlatforms.length===0) return <><PageHeader title="Plataformas departamentais" description="As áreas de trabalho são disponibilizadas conforme o plano da organização."/><div className="rounded-xl border bg-card p-6"><p className="font-semibold">Nenhuma plataforma departamental incluída</p><p className="mt-2 text-sm text-muted-foreground">O plano atual não inclui estas áreas, ou a assinatura não está ativa. Consulte os direitos do plano antes de continuar.</p><Link className="mt-4 inline-flex text-sm font-medium text-cyan underline" to="/app/planos">Ver plano e assinatura</Link></div></>;
  const Icon=platform.icon;
  return <>
   <PageHeader title="Plataformas departamentais" description="Áreas de trabalho integradas na mesma organização. Os registos são separados por empresa." />
   <div className="mb-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-   {platforms.map(p=>{const I=p.icon; return <button key={p.id} onClick={()=>{setActive(p.id);setForm({});setFormOpen(false);}} className={`rounded-xl border p-3 text-left transition ${active===p.id?"border-cyan-500 bg-cyan-500/10 shadow-sm":"bg-card hover:border-cyan-500/40"}`}><div className="flex items-center gap-2"><I className="h-4 w-4 text-cyan-600"/><span className="text-sm font-semibold">{p.title}</span></div><p className="mt-2 text-xs text-muted-foreground">{p.fields.length} campos de registo</p></button>})}
+   {availablePlatforms.map(p=>{const I=p.icon; return <button key={p.id} onClick={()=>{setActive(p.id);setForm({});setFormOpen(false);}} className={`rounded-xl border p-3 text-left transition ${active===p.id?"border-cyan-500 bg-cyan-500/10 shadow-sm":"bg-card hover:border-cyan-500/40"}`}><div className="flex items-center gap-2"><I className="h-4 w-4 text-cyan-600"/><span className="text-sm font-semibold">{p.title}</span></div><p className="mt-2 text-xs text-muted-foreground">{p.fields.length} campos de registo</p></button>})}
   </div>
   <section className="rounded-xl border bg-card p-4 md:p-5">
    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><Icon className="h-5 w-5 text-cyan-600"/><div><h2 className="font-semibold">{platform.title}</h2><p className="text-xs text-muted-foreground">{query.data?.length ?? 0} registos carregados (máx. 250)</p></div></div><div className="flex gap-2"><Button variant="outline" size="sm" onClick={()=>query.refetch()}><RefreshCw className="mr-2 h-4 w-4"/>Atualizar</Button>{writable&&<Button size="sm" onClick={()=>setFormOpen(v=>!v)}><Plus className="mr-2 h-4 w-4"/>Novo registo</Button>}</div></div>
