@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BriefcaseBusiness, GraduationCap, Hotel, Factory, Scale, Users, Wrench, Plus, RefreshCw } from "lucide-react";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { errMsg, formatDate } from "@/lib/format";
+import { errMsg, formatDate, formatKz } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/departamentos")({
   head: () => ({ meta: [{ title: "Plataformas departamentais — Nexora" }, { name: "description", content: "Registos operacionais por departamento da organização." }] }),
@@ -96,7 +96,7 @@ function HospitalityOrderActions({ orgId, orderId, orderNumber, status, total, w
  });
  const items=itemsQuery.data??[];
  const calculatedTotal=items.reduce((sum,item)=>sum+Number(item.line_subtotal)+Number(item.line_tax),0);
- async function addItem(e:React.FormEvent){
+ async function addItem(e:FormEvent){
   e.preventDefault();
   const qty=Number(quantity),price=Number(unitPrice),tax=Number(taxRate);
   if(!description.trim()||!(qty>0)||!(price>=0)||!(tax>=0&&tax<=100)) return toast.error("Verifique a descrição, quantidade, preço e IVA.");
