@@ -69,6 +69,7 @@ function Team() {
 
 function Invites() {
   const { orgId } = useOrg();
+  const db = supabase as any;
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("employee");
@@ -76,7 +77,7 @@ function Invites() {
   const departments = useQuery({
     queryKey: ["invitable-platforms"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("department_platforms").select("code,name").eq("is_active", true).order("sort_order");
+      const { data, error } = await db.from("department_platforms").select("code,name").eq("is_active", true).order("sort_order");
       if (error) throw error;
       return data ?? [];
     },
@@ -84,7 +85,7 @@ function Invites() {
   const q = useQuery({
     queryKey: ["invites", orgId], enabled: !!orgId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("organization_invitations").select("*").eq("organization_id", orgId!).eq("status", "pending").order("created_at", { ascending: false });
+      const { data, error } = await db.from("organization_invitations").select("*").eq("organization_id", orgId!).eq("status", "pending").order("created_at", { ascending: false });
       if (error) throw error;
       return data ?? [];
     },
