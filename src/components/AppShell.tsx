@@ -23,7 +23,7 @@ const NAV = [
   { to: "/app/clientes", label: "Clientes", icon: Users, roles: null },
   { to: "/app/vendas", label: "Pipeline comercial", icon: TrendingUp, roles: ["owner", "admin", "director", "manager", "supervisor", "sales", "accountant", "auditor"] },
   { to: "/app/suporte", label: "Atendimento e suporte", icon: Headphones, roles: ["owner", "admin", "director", "manager", "supervisor", "operator", "employee", "sales", "support", "auditor"] },
-  { to: "/app/inventario", label: "Inventário e stock", icon: Package, roles: ["owner", "admin", "director", "manager", "supervisor", "operator"] },
+  { to: "/app/inventario", label: "Inventário e stock", icon: Package, roles: ["owner", "admin", "director", "manager", "warehouse", "warehouse_manager", "stock_manager", "sales", "sales_manager", "operator", "accountant", "auditor"] },
   { to: "/app/equipa", label: "Equipa", icon: UserCog, roles: null },
   { to: "/app/planos", label: "Plano e assinatura", icon: CreditCard, roles: null },
   { to: "/app/auditoria", label: "Auditoria", icon: ScrollText, roles: ["owner", "admin", "director", "auditor", "accountant"] },
