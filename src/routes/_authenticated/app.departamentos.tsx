@@ -120,7 +120,7 @@ function HospitalityOrderActions({ orgId, orderId, orderNumber, status, total, w
   await Promise.all([qc.invalidateQueries({queryKey:["department-records",orgId,"hospitality_orders"]}),qc.invalidateQueries({queryKey:["finance"]}),qc.invalidateQueries({queryKey:["dashboard"]}),itemsQuery.refetch()]);
   onDone();setOpen(false);
  }
- return <><Button size="sm" variant="outline" onClick={()=>setOpen(true)}>{status==="paid"?"Ver pedido":"Linhas / pagar"}</Button>
+ return <><Button size="sm" variant="outline" onClick={()=>setOpen(true)}>{status==="paid"||status==="cancelled"?"Ver pedido":"Linhas / pagar"}</Button>
   <Dialog open={open} onOpenChange={setOpen}>
    <DialogContent className="max-w-3xl">
     <DialogHeader><DialogTitle>Pedido POS · {orderNumber}</DialogTitle></DialogHeader>
