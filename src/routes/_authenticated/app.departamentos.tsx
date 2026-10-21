@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { errMsg, formatDate, formatKz } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/departamentos")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    platform: typeof search.platform === "string" ? search.platform : undefined,
+  }),
   head: () => ({ meta: [{ title: "Plataformas departamentais — Nexora" }, { name: "description", content: "Registos operacionais por departamento da organização." }] }),
   component: Departments,
 });
@@ -149,7 +152,9 @@ function HospitalityOrderActions({ orgId, orderId, orderNumber, status, total, w
 function Departments() {
  const { orgId, current, can } = useOrg();
  const qc = useQueryClient();
- const [active, setActive] = useState<string>(platforms[0].id);
+ const search = Route.useSearch();
+ const requestedPlatform = platforms.some(p => p.id === search.platform) ? search.platform : platforms[0].id;
+ const [active, setActive] = useState<string>(requestedPlatform);
  const [formOpen, setFormOpen] = useState(false);
  const [form, setForm] = useState<Record<string,string>>({});
  const entitlementQuery = useQuery({
