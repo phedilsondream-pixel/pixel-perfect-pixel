@@ -50,7 +50,7 @@ function Plans() {
     enabled: !!orgId,
     queryFn: async () => {
       const [plansResult, subscriptionResult, platformsResult, entitlementsResult] = await Promise.all([
-        db.from("plans").select("id,code,name,description,price_monthly,price_yearly,currency,max_users,max_branches,max_storage_mb,is_active,sort_order").eq("is_active", true).order("sort_order"),
+        db.from("plans").select("id,code,name,description,price_monthly,price_yearly,currency,max_users,max_branches,max_storage_mb,is_active,sort_order").order("sort_order"),
         db.from("subscriptions").select("id,plan_id,status,billing_cycle,current_period_start,current_period_end,trial_ends_at,cancel_at_period_end,created_at").eq("organization_id", orgId!).order("created_at", { ascending: false }).limit(1).maybeSingle(),
         db.from("department_platforms").select("code,name").eq("is_active", true).order("sort_order"),
         db.from("plan_platforms").select("plan_id,platform_code,enabled").eq("enabled", true),
@@ -91,7 +91,7 @@ function Plans() {
             ))}
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
-            {d?.plans.map((p) => {
+            {d?.plans.filter((p) => p.is_active || d.sub?.plan_id === p.id).map((p) => {
               const mine = d.sub?.plan_id === p.id;
               const enabledPlatforms = d.platforms.filter((platform) => d.entitlements.some((e) => e.plan_id === p.id && e.platform_code === platform.code && e.enabled));
               const price = Number(cycle === "monthly" ? p.price_monthly : p.price_yearly);
