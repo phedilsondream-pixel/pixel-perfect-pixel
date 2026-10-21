@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       if (!sub || !active) return [] as string[];
       const { data, error } = await db.from("plan_platforms").select("platform_code").eq("plan_id", sub.plan_id).eq("enabled", true);
       if (error) throw error;
-      return (data ?? []).map((row) => row.platform_code);
+      return ((data ?? []) as { platform_code: string }[]).map((row) => row.platform_code);
     },
   });
   const [open, setOpen] = useState(false);
@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (!current && !path.startsWith("/admin")) return <Onboarding />;
 
   const hasRouteEntitlement = (route: string) => admin.data === true || (route === "/app/clientes"
-    ? !!platformAccess.data?.some((code) => ["crm", "invoicing", "pos"].includes(code))
+    ? !!platformAccess.data?.some((code: string) => ["crm", "invoicing", "pos"].includes(code))
     : !requiredPlatformByRoute[route] || !!platformAccess.data?.includes(requiredPlatformByRoute[route]));
 
   const nav = (
