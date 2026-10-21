@@ -27,11 +27,16 @@ function InvoiceDetail() {
     queryKey: ["invoice", id],
     queryFn: async () => {
       const [inv, items] = await Promise.all([
-        supabase.from("invoices").select("*, customers(*)").eq("id", id).maybeSingle(),
+        supabase.from("invoices").select("*").eq("id", id).maybeSingle(),
         supabase.from("invoice_items").select("*").eq("invoice_id", id).order("sort_order"),
       ]);
       if (inv.error) throw inv.error;
-      return { inv: inv.data, items: items.data ?? [] };
+      if (items.error) throw items.error;
+      const customerResult = inv.data?.customer_id
+        ? await supabase.from("customers").select("id,name,nif,tax_id,address").eq("id", inv.data.customer_id).eq("organization_id", inv.data.organization_id).maybeSingle()
+        : { data: null, error: null };
+      if (customerResult.error) throw customerResult.error;
+      return { inv: inv.data ? { ...inv.data, customers: customerResult.data } : null, items: items.data ?? [] };
     },
   });
   const refresh = () => { qc.invalidateQueries({ queryKey: ["invoice", id] }); qc.invalidateQueries({ queryKey: ["invoices"] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); };
@@ -43,7 +48,7 @@ function InvoiceDetail() {
   if (!inv) return <Empty title="Documento não encontrado" hint="Pode ter sido apagado ou não tem acesso." />;
   const items = q.data!.items;
   const draft = inv.status === "draft";
-  const cust = inv.customers as { name: string; nif: string | null; address: string | null } | null;
+  const cust = inv.customers as { name: string; nif: string | null; tax_id: string | null; address: string | null } | null;
   const preview = lineTotals(Number(line.quantity) || 0, Number(line.unit_price) || 0, Number(line.tax_rate) || 0);
 
   async function addLine(e: React.FormEvent) {
@@ -104,7 +109,7 @@ function InvoiceDetail() {
           </div>
         </div>
         <div className="mt-8 grid gap-6 text-sm sm:grid-cols-3">
-          <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Cliente</div><div className="mt-1 font-medium">{cust?.name}</div>{cust?.nif && <div className="text-muted-foreground">NIF {cust.nif}</div>}{cust?.address && <div className="text-muted-foreground">{cust.address}</div>}</div>
+          <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Cliente</div><div className="mt-1 font-medium">{cust?.name}</div>{(cust?.nif ?? cust?.tax_id) && <div className="text-muted-foreground">NIF {cust?.nif ?? cust?.tax_id}</div>}{cust?.address && <div className="text-muted-foreground">{cust.address}</div>}</div>
           <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Data</div><div className="mt-1">{formatDate(inv.issue_date)}</div></div>
           <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Vencimento</div><div className="mt-1">{formatDate(inv.due_date)}</div></div>
         </div>
