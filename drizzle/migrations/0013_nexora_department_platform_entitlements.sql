@@ -88,7 +88,9 @@ as $function$
           from public.organizations o
           join public.subscriptions s on s.organization_id = o.id
           join public.plans p on p.id = s.plan_id
-          join public.department_platforms dp on dp.code = p_platform_code and dp.is_active is true
+          join public.plan_platforms pp on pp.plan_id = p.id
+            and pp.platform_code = p_platform_code and pp.enabled is true
+          join public.department_platforms dp on dp.code = pp.platform_code and dp.is_active is true
           where o.id = p_org
             and lower(coalesce(o.status, '')) not in ('cancelled','canceled','suspended','deleted','inactive')
             and p.is_active is true
@@ -96,11 +98,6 @@ as $function$
             and (s.current_period_start is null or s.current_period_start <= now())
             and (s.current_period_end is null or s.current_period_end >= now())
             and (s.status <> 'trial' or s.trial_ends_at is null or s.trial_ends_at >= now())
-            and (
-              coalesce(p.features->'modules','[]'::jsonb) ? 'all'
-              or coalesce(p.features->'modules','[]'::jsonb) ? p_platform_code
-              or (p_platform_code = 'inventory' and coalesce(p.features->'modules','[]'::jsonb) ? 'stock')
-            )
         )
       )
     );
