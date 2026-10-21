@@ -69,9 +69,9 @@ function Departments() {
    return (data??[]).map((row:{platform_code:string})=>row.platform_code) as string[];
   }
  });
- const availablePlatforms = useMemo(() => platforms.filter(p => (entitlementQuery.data?.includes(platformEntitlementCode[p.id]) || (p.id==="hospitality_orders" && (entitlementQuery.data?.includes("restaurant") || entitlementQuery.data?.includes("pos")))) && platformReadRoles[p.id].includes(current?.role ?? "")), [entitlementQuery.data,current?.role]);
+ const availablePlatforms = useMemo(() => platforms.filter(p => (entitlementQuery.data?.includes(platformEntitlementCode[p.id] ?? "") || (p.id==="hospitality_orders" && (entitlementQuery.data?.includes("restaurant") || entitlementQuery.data?.includes("pos")))) && (platformReadRoles[p.id]?.includes(current?.role ?? "") ?? false)), [entitlementQuery.data,current?.role]);
  const platform = useMemo(() => availablePlatforms.find(p => p.id === active) ?? availablePlatforms[0] ?? platforms[0], [availablePlatforms,active]);
- const writable = platformWriteRoles[platform.id].includes(current?.role ?? "") || can(["owner","admin"]);
+ const writable = (platformWriteRoles[platform.id]?.includes(current?.role ?? "") ?? false) || can(["owner","admin"]);
  const query = useQuery({
   queryKey:["department-records",orgId,platform.table],
   enabled:!!orgId && availablePlatforms.some(p=>p.id===platform.id),
