@@ -47,7 +47,7 @@ function Inventory() {
     queryFn: async () => {
       const [{ data: warehouses, error: warehouseError }, { data, error }] = await Promise.all([
         db.from("warehouses").select("id, is_default").eq("organization_id", orgId).order("is_default", { ascending: false }),
-        db.from("products").select("id, organization_id, sku, name, description, unit, cost, is_active, updated_at, stock_levels(warehouse_id, quantity, min_quantity)").eq("organization_id", orgId).order("name"),
+        db.from("products").select("id, organization_id, sku, name, description, unit, cost, minimum_quantity, is_active, updated_at, stock_levels(warehouse_id, quantity, min_quantity)").eq("organization_id", orgId).order("name"),
       ]);
       if (warehouseError) throw warehouseError;
       if (error) throw error;
@@ -55,7 +55,7 @@ function Inventory() {
       return (data ?? []).map((product: any) => {
         const levels = product.stock_levels ?? [];
         const level = levels.find((entry: any) => entry.warehouse_id === defaultWarehouse?.id) ?? levels[0] ?? null;
-        return { ...product, sku: product.sku ?? "", quantity: Number(level?.quantity ?? 0), minimum_quantity: Number(level?.min_quantity ?? 0), unit_cost: Number(product.cost ?? 0), active: product.is_active, warehouse_id: level?.warehouse_id ?? defaultWarehouse?.id ?? null } as Item;
+        return { ...product, sku: product.sku ?? "", quantity: Number(level?.quantity ?? 0), minimum_quantity: Number(product.minimum_quantity ?? level?.min_quantity ?? 0), unit_cost: Number(product.cost ?? 0), active: product.is_active, warehouse_id: level?.warehouse_id ?? defaultWarehouse?.id ?? null } as Item;
       });
     },
   });
@@ -92,7 +92,7 @@ function Inventory() {
     const { data, error } = await db.from("products").insert({
       organization_id: orgId, sku: itemForm.sku.trim(), name: itemForm.name.trim(),
       description: itemForm.description.trim() || null, unit: itemForm.unit.trim() || "un",
-      price: 0, cost, currency: "AOA", is_active: true,
+      price: 0, cost, minimum_quantity: min, currency: "AOA", is_active: true,
     }).select("id").single();
     if (error) return toast.error(error.code === "23505" ? "Já existe um artigo com este SKU nesta organização." : errMsg(error));
     setNewOpen(false); setItemForm(emptyItem);
