@@ -80,8 +80,9 @@ function InvoiceDetail() {
         <div className="flex flex-wrap gap-2">
           {draft && can(SALES_WRITE) && <>
             <Button variant="ghost" onClick={removeDraft}>Apagar rascunho</Button>
-            <Button variant="copper" onClick={issue} disabled={items.length === 0}>Emitir documento</Button>
+            <Button variant="copper" onClick={issue} disabled={items.length === 0 || inv.doc_type !== "PF"}>Emitir pró-forma interna</Button>
           </>}
+          {draft && inv.doc_type !== "PF" && <p className="max-w-md text-xs text-amber-600">A emissão fiscal de FT/FR/NC está bloqueada até a Nexora concluir a integração e autorização da AGT. Pode guardar o documento como rascunho; não será apresentado como fatura fiscal emitida.</p>}
           {inv.status === "issued" && can(FINANCE_WRITE) && <>
             {Number(inv.amount_paid) === 0 && <CancelDialog id={id} onDone={refresh} />}
             <PayDialog id={id} due={Number(inv.total) - Number(inv.amount_paid)} onDone={refresh} />
