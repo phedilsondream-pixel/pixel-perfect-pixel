@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { errMsg, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/app/departamentos")({
@@ -48,6 +49,102 @@ const platforms = [
  { id:"hospitality_orders", title:"Hotelaria e POS", table:"hospitality_orders", icon:Hotel, name:"order_number", code:"order_number", status:"status", statuses:["open","confirmed","preparing","ready","served","paid","cancelled"], fields:[["order_number","N.º pedido"],["order_type","Tipo (pos/restaurant/takeaway)"],["table_reference","Mesa"],["notes","Notas"]] },
  { id:"legal_documents", title:"Jurídico", table:"legal_documents", icon:Scale, name:"title", code:"reference", status:"status", statuses:["draft","review","approved","signed","expired","archived"], fields:[["reference","Referência"],["title","Título"],["document_type","Tipo de documento"],["counterparty","Contraparte"],["effective_date","Data de início"],["expiry_date","Data de validade"],["notes","Notas"]] },
 ] as const;
+
+type HospitalityItem = { id: string; product_id: string | null; description: string; quantity: number; unit_price: number; tax_rate: number; line_subtotal: number; line_tax: number; sort_order: number };
+type HospitalityProduct = { id: string; name: string; sku: string | null; price: number; unit: string | null };
+type FinanceAccount = { id: string; name: string; type: string };
+
+function HospitalityOrderActions({ orgId, orderId, orderNumber, status, total, writable, onDone }: {
+ orgId: string; orderId: string; orderNumber: string; status: string; total: number; writable: boolean; onDone: () => void;
+}) {
+ const [open,setOpen]=useState(false);
+ const [productId,setProductId]=useState("");
+ const [description,setDescription]=useState("");
+ const [quantity,setQuantity]=useState("1");
+ const [unitPrice,setUnitPrice]=useState("");
+ const [taxRate,setTaxRate]=useState("14");
+ const [accountId,setAccountId]=useState("");
+ const [paymentMethod,setPaymentMethod]=useState("cash");
+ const qc=useQueryClient();
+ const closed=status==="paid"||status==="cancelled";
+ const productsQuery=useQuery({
+  queryKey:["hospitality-products",orgId],
+  enabled:open,
+  queryFn:async()=>{
+   const {data,error}=await db.from("products").select("id,name,sku,price,unit").eq("organization_id",orgId).eq("is_active",true).order("name");
+   if(error) throw error;
+   return (data??[]) as HospitalityProduct[];
+  }
+ });
+ const itemsQuery=useQuery({
+  queryKey:["hospitality-order-items",orgId,orderId],
+  enabled:open,
+  queryFn:async()=>{
+   const {data,error}=await db.from("hospitality_order_items").select("id,product_id,description,quantity,unit_price,tax_rate,line_subtotal,line_tax,sort_order").eq("organization_id",orgId).eq("order_id",orderId).order("sort_order");
+   if(error) throw error;
+   return (data??[]) as HospitalityItem[];
+  }
+ });
+ const accountsQuery=useQuery({
+  queryKey:["hospitality-finance-accounts",orgId],
+  enabled:open&&!closed,
+  queryFn:async()=>{
+   const {data,error}=await db.from("bank_accounts").select("id,name,type,is_active").eq("organization_id",orgId).eq("is_active",true).order("name");
+   if(error) throw error;
+   return (data??[]) as FinanceAccount[];
+  }
+ });
+ const items=itemsQuery.data??[];
+ const calculatedTotal=items.reduce((sum,item)=>sum+Number(item.line_subtotal)+Number(item.line_tax),0);
+ async function addItem(e:React.FormEvent){
+  e.preventDefault();
+  const qty=Number(quantity),price=Number(unitPrice),tax=Number(taxRate);
+  if(!description.trim()||!(qty>0)||!(price>=0)||!(tax>=0&&tax<=100)) return toast.error("Verifique a descrição, quantidade, preço e IVA.");
+  const nextOrder=Math.max(-1,...items.map(item=>Number(item.sort_order??-1)))+1;
+  const {error}=await db.from("hospitality_order_items").insert({order_id:orderId,organization_id:orgId,product_id:productId||null,description:description.trim(),quantity:qty,unit_price:price,tax_rate:tax,sort_order:nextOrder});
+  if(error) return toast.error(errMsg(error));
+  setProductId("");setDescription("");setQuantity("1");setUnitPrice("");
+  await Promise.all([itemsQuery.refetch(),qc.invalidateQueries({queryKey:["department-records",orgId,"hospitality_orders"]})]);
+ }
+ async function removeItem(itemId:string){
+  const {error}=await db.from("hospitality_order_items").delete().eq("id",itemId).eq("order_id",orderId);
+  if(error) return toast.error(errMsg(error));
+  await Promise.all([itemsQuery.refetch(),qc.invalidateQueries({queryKey:["department-records",orgId,"hospitality_orders"]})]);
+ }
+ async function settle(){
+  if(!accountId) return toast.error("Selecione a conta financeira que vai receber o pagamento.");
+  if(items.length===0||calculatedTotal<=0) return toast.error("Adicione pelo menos um artigo com valor válido.");
+  const {error}=await db.rpc("settle_hospitality_order",{_order:orderId,_account:accountId,_payment_method:paymentMethod});
+  if(error) return toast.error(errMsg(error));
+  toast.success("Venda fechada; pagamento registado e stock atualizado.");
+  await Promise.all([qc.invalidateQueries({queryKey:["department-records",orgId,"hospitality_orders"]}),qc.invalidateQueries({queryKey:["finance"]}),qc.invalidateQueries({queryKey:["dashboard"]}),itemsQuery.refetch()]);
+  onDone();setOpen(false);
+ }
+ return <><Button size="sm" variant="outline" onClick={()=>setOpen(true)}>{status==="paid"?"Ver pedido":"Linhas / pagar"}</Button>
+  <Dialog open={open} onOpenChange={setOpen}>
+   <DialogContent className="max-w-3xl">
+    <DialogHeader><DialogTitle>Pedido POS · {orderNumber}</DialogTitle></DialogHeader>
+    <div className="space-y-3">
+     {itemsQuery.isLoading?<p className="text-sm text-muted-foreground">A carregar linhas…</p>:itemsQuery.isError?<p className="text-sm text-destructive">Não foi possível carregar as linhas do pedido.</p>:<div className="overflow-x-auto rounded-md border"><table className="w-full text-sm"><thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="p-2">Artigo</th><th className="p-2 text-right">Qtd.</th><th className="p-2 text-right">Preço</th><th className="p-2 text-right">Total</th>{writable&&!closed&&<th className="p-2"/>}</tr></thead><tbody>{items.map(item=><tr key={item.id} className="border-b last:border-0"><td className="p-2">{item.description}</td><td className="num p-2 text-right">{Number(item.quantity)}</td><td className="num p-2 text-right">{formatKz(item.unit_price)}</td><td className="num p-2 text-right">{formatKz(Number(item.line_subtotal)+Number(item.line_tax))}</td>{writable&&!closed&&<td className="p-2 text-right"><Button size="sm" variant="ghost" onClick={()=>removeItem(item.id)}>Remover</Button></td>}</tr>)}{items.length===0&&<tr><td colSpan={writable&&!closed?5:4} className="p-4 text-center text-muted-foreground">Adicione o primeiro artigo ao pedido.</td></tr>}</tbody></table></div>}
+     {writable&&!closed&&<form onSubmit={addItem} className="grid gap-2 rounded-md bg-muted/40 p-3 sm:grid-cols-2">
+      <div className="space-y-1 sm:col-span-2"><Label>Catálogo de produtos (opcional)</Label><Select value={productId||"manual"} onValueChange={value=>{const product=productsQuery.data?.find(p=>p.id===value);setProductId(value==="manual"?"":value);if(product){setDescription(product.name);setUnitPrice(String(product.price??0));}}}><SelectTrigger><SelectValue placeholder="Escolher produto"/></SelectTrigger><SelectContent><SelectItem value="manual">Linha manual / serviço</SelectItem>{(productsQuery.data??[]).map(product=><SelectItem key={product.id} value={product.id}>{product.name}{product.sku ? " · " + product.sku : ""}</SelectItem>)}</SelectContent></Select></div>
+      <div className="space-y-1"><Label>Descrição</Label><Input required maxLength={200} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Artigo ou serviço"/></div>
+      <div className="space-y-1"><Label>Quantidade</Label><Input required type="number" min="0.001" step="0.001" value={quantity} onChange={e=>setQuantity(e.target.value)}/></div>
+      <div className="space-y-1"><Label>Preço unitário (Kz)</Label><Input required type="number" min="0" step="0.01" value={unitPrice} onChange={e=>setUnitPrice(e.target.value)} placeholder="0,00"/></div>
+      <div className="space-y-1"><Label>IVA (%)</Label><Input required type="number" min="0" max="100" step="0.01" value={taxRate} onChange={e=>setTaxRate(e.target.value)}/></div>
+      <div className="sm:col-span-2"><Button type="submit" disabled={closed}>Adicionar artigo</Button></div>
+     </form>}
+     <div className="flex items-center justify-between border-t pt-3"><div><p className="text-xs text-muted-foreground">Total calculado no servidor</p><p className="num text-xl font-semibold">{formatKz(total||calculatedTotal)}</p></div>{status==="paid"&&<span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-700">Pago</span>}</div>
+     {writable&&!closed&&<div className="space-y-3 rounded-md border p-3">
+      <p className="text-sm font-semibold">Fechar venda</p>
+      {accountsQuery.isLoading?<p className="text-sm text-muted-foreground">A carregar contas financeiras…</p>:accountsQuery.isError?<p className="text-sm text-destructive">Não foi possível carregar contas. Confirme se Finanças está incluída no plano.</p>:accountsQuery.data?.length?<><div className="grid gap-2 sm:grid-cols-2"><div className="space-y-1"><Label>Conta de recebimento</Label><Select value={accountId||"none"} onValueChange={value=>setAccountId(value==="none"?"":value)}><SelectTrigger><SelectValue placeholder="Escolher conta"/></SelectTrigger><SelectContent><SelectItem value="none">Escolher conta</SelectItem>{accountsQuery.data.map(account=><SelectItem key={account.id} value={account.id}>{account.name} · {account.type}</SelectItem>)}</SelectContent></Select></div><div className="space-y-1"><Label>Método de pagamento</Label><Select value={paymentMethod} onValueChange={setPaymentMethod}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="cash">Numerário</SelectItem><SelectItem value="multicaixa">Multicaixa Express</SelectItem><SelectItem value="card">Cartão</SelectItem><SelectItem value="transfer">Transferência</SelectItem><SelectItem value="other">Outro</SelectItem></SelectContent></Select></div></div><Button onClick={settle} disabled={!accountId||items.length===0||calculatedTotal<=0}>Confirmar pagamento e baixar stock</Button></>:<p className="text-sm text-muted-foreground">Crie uma conta em Finanças e confirme que o plano inclui Finanças para fechar esta venda.</p>}
+     </div>}
+     <p className="text-xs text-muted-foreground">O pagamento, a saída de stock e a atualização do pedido são feitos numa única transação. Se faltar stock ou a conta não pertencer à empresa, nada é confirmado.</p>
+    </div>
+   </DialogContent>
+  </Dialog>
+ </>;
+}
 
 function Departments() {
  const { orgId, current, can } = useOrg();
