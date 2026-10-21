@@ -69,17 +69,21 @@ function Team() {
 
 function Invites() {
   const { orgId } = useOrg();
+  // The generated Supabase types lag the live schema; this table is added by migration 0036.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("employee");
   const [platformCode, setPlatformCode] = useState("");
+  type InvitablePlatform = { code: string; name: string };
+  type PendingInvitation = { id: string; email: string; role: string; platform_code: string | null };
   const departments = useQuery({
     queryKey: ["invitable-platforms"],
     queryFn: async () => {
       const { data, error } = await db.from("department_platforms").select("code,name").eq("is_active", true).order("sort_order");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as InvitablePlatform[];
     },
   });
   const q = useQuery({
@@ -87,7 +91,7 @@ function Invites() {
     queryFn: async () => {
       const { data, error } = await db.from("organization_invitations").select("*").eq("organization_id", orgId!).eq("status", "pending").order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as PendingInvitation[];
     },
   });
   async function invite(e: React.FormEvent) {
@@ -98,7 +102,7 @@ function Invites() {
     const { data: authData } = await supabase.auth.getUser();
     if (!authData.user) return toast.error("A sessão expirou. Entre novamente.");
     const { error } = await supabase.from("organization_invitations").insert({
-      organization_id: orgId!, email: clean, role, platform_code: platformCode, invited_by: authData.user.id,
+      organization_id: orgId!, email: clean, role: role as "employee" | "admin" | "director" | "manager" | "supervisor" | "operator" | "accountant" | "hr" | "sales" | "support" | "auditor", platform_code: platformCode, invited_by: authData.user.id,
     });
     if (error) return toast.error(error.code === "23505" ? "Já existe um convite pendente para este email." : errMsg(error));
     toast.warning("Convite registado na plataforma. O envio de email ainda não está ligado; avise a pessoa por outro canal.");
@@ -116,7 +120,7 @@ function Invites() {
       <form onSubmit={invite} className="mt-3 flex flex-wrap gap-2">
         <Input type="email" required maxLength={150} placeholder="email@empresa.ao" value={email} onChange={(e) => setEmail(e.target.value)} className="max-w-xs" />
         <Select value={platformCode} onValueChange={setPlatformCode}><SelectTrigger className="w-56"><SelectValue placeholder="Plataforma de destino" /></SelectTrigger>
-          <SelectContent>{(departments.data ?? []).map((d) => <SelectItem key={d.code} value={d.code}>{d.name}</SelectItem>)}</SelectContent>
+          <SelectContent>{(departments.data ?? []).map((d: InvitablePlatform) => <SelectItem key={d.code} value={d.code}>{d.name}</SelectItem>)}</SelectContent>
         </Select>
         <Select value={role} onValueChange={setRole}><SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
           <SelectContent>{Object.entries(ROLE_LABELS).filter(([k]) => k !== "owner").map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select>
@@ -124,9 +128,9 @@ function Invites() {
       </form>
       {q.data && q.data.length > 0 && (
         <div className="mt-4 divide-y text-sm">
-          {q.data.map((i) => (
+          {q.data.map((i: PendingInvitation) => (
             <div key={i.id} className="flex items-center justify-between py-2">
-              <span>{i.email} · {ROLE_LABELS[i.role] ?? i.role} · {departments.data?.find((d) => d.code === i.platform_code)?.name ?? "Plataforma"} · <span className="text-muted-foreground">pendente</span></span>
+              <span>{i.email} · {ROLE_LABELS[i.role] ?? i.role} · {departments.data?.find((d: InvitablePlatform) => d.code === i.platform_code)?.name ?? "Plataforma"} · <span className="text-muted-foreground">pendente</span></span>
               <Button size="sm" variant="ghost" onClick={() => revoke(i.id)}>Cancelar</Button>
             </div>
           ))}
