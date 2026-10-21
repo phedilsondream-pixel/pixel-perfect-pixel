@@ -43,7 +43,7 @@ function Invoices() {
           <SelectContent><SelectItem value="all">Todos os estados</SelectItem>{Object.entries(INVOICE_STATUS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent></Select>
       </div>
       {q.data && q.data.length === 0 ? (
-        <Empty title="Sem documentos" hint="Crie um rascunho, adicione linhas e emita para atribuir número sequencial." />
+        <Empty title="Sem documentos" hint="Pode emitir pró-formas internas. Faturas fiscais FT/FR e notas de crédito ficam bloqueadas até concluir a autorização e integração com a AGT." />
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">
           <table className="w-full text-sm">
@@ -78,7 +78,7 @@ function NewInvoiceDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
   const { orgId } = useOrg();
   const navigate = useNavigate();
   const [customer, setCustomer] = useState("");
-  const [docType, setDocType] = useState("FT");
+  const [docType, setDocType] = useState("PF");
   const customers = useQuery({
     queryKey: ["customers", orgId], enabled: !!orgId && open,
     queryFn: async () => (await supabase.from("customers").select("*").eq("organization_id", orgId!).order("name")).data ?? [],
