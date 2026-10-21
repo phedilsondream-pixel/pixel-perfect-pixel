@@ -39,9 +39,18 @@ function InvoiceDetail() {
       return { inv: inv.data ? { ...inv.data, customers: customerResult.data } : null, items: items.data ?? [] };
     },
   });
+  const productsQuery = useQuery({
+    queryKey: ["invoice-products", orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("products").select("id,name,sku,price,unit").eq("organization_id", orgId!).eq("is_active", true).order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
   const refresh = () => { qc.invalidateQueries({ queryKey: ["invoice", id] }); qc.invalidateQueries({ queryKey: ["invoices"] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); };
 
-  const [line, setLine] = useState({ description: "", quantity: "1", unit_price: "", tax_rate: String(current?.organizations?.default_tax_rate ?? 14) });
+  const [line, setLine] = useState({ product_id: "", description: "", quantity: "1", unit_price: "", tax_rate: String(current?.organizations?.default_tax_rate ?? 14) });
 
   if (q.isLoading) return <p className="text-muted-foreground">A carregar…</p>;
   const inv = q.data?.inv;
@@ -55,9 +64,9 @@ function InvoiceDetail() {
     e.preventDefault();
     const quantity = Number(line.quantity), unit_price = Number(line.unit_price), tax_rate = Number(line.tax_rate);
     if (!(quantity > 0) || !(unit_price >= 0) || !(tax_rate >= 0 && tax_rate <= 100)) return toast.error("Valores inválidos.");
-    const { error } = await supabase.from("invoice_items").insert({ invoice_id: id, organization_id: orgId!, description: line.description.trim(), quantity, unit_price, tax_rate, sort_order: Math.max(-1, ...items.map((item) => Number(item.sort_order ?? -1))) + 1 });
+    const { error } = await supabase.from("invoice_items").insert({ invoice_id: id, organization_id: orgId!, product_id: line.product_id || null, description: line.description.trim(), quantity, unit_price, tax_rate, sort_order: Math.max(-1, ...items.map((item) => Number(item.sort_order ?? -1))) + 1 });
     if (error) return toast.error(errMsg(error));
-    setLine({ ...line, description: "", unit_price: "", quantity: "1" });
+    setLine({ ...line, product_id: "", description: "", unit_price: "", quantity: "1" });
     refresh();
   }
   async function removeLine(lineId: string) {
@@ -136,7 +145,8 @@ function InvoiceDetail() {
         </div>
 
         {draft && can(SALES_WRITE) && (
-          <form onSubmit={addLine} className="mt-4 grid gap-2 rounded-md bg-muted p-3 sm:grid-cols-[1fr_80px_130px_80px_auto] print:hidden">
+          <form onSubmit={addLine} className="mt-4 grid gap-2 rounded-md bg-muted p-3 sm:grid-cols-[1.3fr_1.3fr_80px_130px_80px_auto] print:hidden">
+            <select aria-label="Produto do catálogo (opcional)" value={line.product_id} onChange={(e) => { const selected = productsQuery.data?.find((product) => product.id === e.target.value); setLine({ ...line, product_id: e.target.value, description: selected?.name ?? line.description, unit_price: selected ? String(selected.price ?? 0) : line.unit_price }); }} className="h-10 rounded-md border border-input bg-background px-3 text-sm"><option value="">Linha manual / serviço</option>{(productsQuery.data ?? []).map((product) => <option key={product.id} value={product.id}>{product.name}{product.sku ? ` · ${product.sku}` : ""}</option>)}</select>
             <Input required maxLength={200} placeholder="Descrição" value={line.description} onChange={(e) => setLine({ ...line, description: e.target.value })} />
             <Input required type="number" step="0.001" min="0.001" aria-label="Quantidade" value={line.quantity} onChange={(e) => setLine({ ...line, quantity: e.target.value })} />
             <Input required type="number" step="0.01" min="0" placeholder="Preço (Kz)" value={line.unit_price} onChange={(e) => setLine({ ...line, unit_price: e.target.value })} />
