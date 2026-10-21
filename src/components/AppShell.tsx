@@ -67,9 +67,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (loading) return <div className="grid min-h-screen place-items-center text-muted-foreground">A carregar…</div>;
   if (!current && !path.startsWith("/admin")) return <Onboarding />;
 
+  const hasRouteEntitlement = (route: string) => route === "/app/clientes"
+    ? !!platformAccess.data?.some((code) => ["crm", "invoicing", "pos"].includes(code))
+    : !requiredPlatformByRoute[route] || !!platformAccess.data?.includes(requiredPlatformByRoute[route]);
+
   const nav = (
     <nav className="flex flex-col gap-1 p-3">
-      {NAV.filter((n) => (!n.roles || can([...n.roles])) && (!requiredPlatformByRoute[n.to] || platformAccess.data?.includes(requiredPlatformByRoute[n.to]))).map((n) => {
+      {NAV.filter((n) => (!n.roles || can([...n.roles])) && hasRouteEntitlement(n.to)).map((n) => {
         const active = n.to === "/app" ? path === "/app" : path.startsWith(n.to);
         return (
           <Link key={n.to} to={n.to as never} onClick={() => setOpen(false)}
