@@ -14,6 +14,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ROLE_LABELS, errMsg } from "@/lib/format";
 
+// The connected production schema includes additive migrations not yet reflected in generated client types.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 const requiredPlatformByRoute: Record<string, string> = { "/app/financas": "finance", "/app/faturacao": "invoicing", "/app/clientes": "crm", "/app/vendas": "crm", "/app/suporte": "support", "/app/inventario": "inventory" };
 
 const NAV = [
@@ -36,7 +40,7 @@ export function usePlatformAdmin() {
     queryKey: ["platform-admin", session?.user.id],
     enabled: !!session,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("is_my_global_admin");
+      const { data, error } = await db.rpc("is_my_global_admin");
       if (error) throw error;
       return data === true;
     },
@@ -53,12 +57,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     queryKey: ["organization-platform-access", current?.organization_id],
     enabled: !!current?.organization_id,
     queryFn: async () => {
-      const { data: sub, error: subError } = await supabase.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id", current!.organization_id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const { data: sub, error: subError } = await db.from("subscriptions").select("plan_id,status,current_period_end,trial_ends_at,created_at").eq("organization_id", current!.organization_id).order("created_at", { ascending: false }).limit(1).maybeSingle();
       if (subError) throw subError;
       const now = Date.now();
       const active = !!sub && ["active", "trial"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime() >= now) && (sub.status !== "trial" || !sub.trial_ends_at || new Date(sub.trial_ends_at).getTime() >= now);
       if (!sub || !active) return [] as string[];
-      const { data, error } = await supabase.from("plan_platforms").select("platform_code").eq("plan_id", sub.plan_id).eq("enabled", true);
+      const { data, error } = await db.from("plan_platforms").select("platform_code").eq("plan_id", sub.plan_id).eq("enabled", true);
       if (error) throw error;
       return (data ?? []).map((row) => row.platform_code);
     },
