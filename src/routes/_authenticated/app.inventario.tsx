@@ -24,6 +24,8 @@ export const Route = createFileRoute("/_authenticated/app/inventario")({
 
 type Item = { id: string; organization_id: string; sku: string; name: string; description: string | null; unit: string; quantity: number; minimum_quantity: number; unit_cost: number; active: boolean; updated_at: string; warehouse_id: string | null };
 type Movement = { id: string; organization_id: string; product_id: string; warehouse_id: string; type: string; quantity: number; quantity_after: number | null; reference: string | null; notes: string | null; note: string | null; created_at: string };
+type WarehouseRow = { id: string; is_default: boolean };
+type ProductRow = { id: string; organization_id: string; sku: string | null; name: string; description: string | null; unit: string; cost: number; minimum_quantity: number; is_active: boolean; updated_at: string; stock_levels?: { warehouse_id: string; quantity: number; min_quantity: number }[] };
 const emptyItem = { sku: "", name: "", description: "", unit: "un", minimum_quantity: "0", unit_cost: "0" };
 const movementLabels: Record<string, string> = { opening: "Stock inicial", receipt: "Entrada", issue: "Saída", adjustment: "Ajuste" };
 
@@ -51,11 +53,13 @@ function Inventory() {
       ]);
       if (warehouseError) throw warehouseError;
       if (error) throw error;
-      const defaultWarehouse = (warehouses ?? []).find((w: { is_default: boolean }) => w.is_default) ?? warehouses?.[0] ?? null;
-      return (data ?? []).map((product: any) => {
+      const warehouseRows = (warehouses ?? []) as WarehouseRow[];
+      const productRows = (data ?? []) as ProductRow[];
+      const defaultWarehouse = warehouseRows.find((w) => w.is_default) ?? warehouseRows[0] ?? null;
+      return productRows.map((product): Item => {
         const levels = product.stock_levels ?? [];
-        const level = levels.find((entry: any) => entry.warehouse_id === defaultWarehouse?.id) ?? levels[0] ?? null;
-        return { ...product, sku: product.sku ?? "", quantity: Number(level?.quantity ?? 0), minimum_quantity: Number(product.minimum_quantity ?? level?.min_quantity ?? 0), unit_cost: Number(product.cost ?? 0), active: product.is_active, warehouse_id: level?.warehouse_id ?? defaultWarehouse?.id ?? null } as Item;
+        const level = levels.find((entry) => entry.warehouse_id === defaultWarehouse?.id) ?? levels[0] ?? null;
+        return { ...product, sku: product.sku ?? "", quantity: Number(level?.quantity ?? 0), minimum_quantity: Number(product.minimum_quantity ?? level?.min_quantity ?? 0), unit_cost: Number(product.cost ?? 0), active: product.is_active, warehouse_id: level?.warehouse_id ?? defaultWarehouse?.id ?? null };
       });
     },
   });
@@ -67,7 +71,7 @@ function Inventory() {
       return (data ?? []) as Movement[];
     },
   });
-  const items = itemsQuery.data ?? [];
+  const items = useMemo(() => (itemsQuery.data ?? []) as Item[], [itemsQuery.data]);
   const visible = useMemo(() => items.filter((item) =>
     item.active && (!lowOnly || Number(item.quantity) <= Number(item.minimum_quantity)) &&
     `${item.sku} ${item.name} ${item.description ?? ""}`.toLowerCase().includes(search.toLowerCase())
@@ -82,8 +86,9 @@ function Inventory() {
     if (!Number.isFinite(min) || min < 0 || !Number.isFinite(cost) || cost < 0) return toast.error("O stock mínimo e o custo devem ser iguais ou superiores a zero.");
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return toast.error("A sessão expirou. Inicie sessão novamente.");
-    let { data: warehouse, error: warehouseError } = await db.from("warehouses").select("id").eq("organization_id", orgId).order("is_default", { ascending: false }).limit(1).maybeSingle();
+    const { data: existingWarehouse, error: warehouseError } = await db.from("warehouses").select("id").eq("organization_id", orgId).order("is_default", { ascending: false }).limit(1).maybeSingle();
     if (warehouseError) return toast.error(errMsg(warehouseError));
+    let warehouse = existingWarehouse;
     if (!warehouse) {
       const createdWarehouse = await db.from("warehouses").insert({ organization_id: orgId, name: "Armazém principal", is_default: true }).select("id").single();
       if (createdWarehouse.error) return toast.error(errMsg(createdWarehouse.error));
