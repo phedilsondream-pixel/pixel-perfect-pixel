@@ -60,12 +60,13 @@ function Index() {
         <p className="mt-1 text-sm text-muted-foreground">Uma suite empresarial integrada, com o estado real de implementação apresentado sem promessas falsas.</p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {PLATFORMS.map((platform, index) => (
-            <div key={platform.id} className={`rounded-lg border bg-card p-4 ${platform.status === "live" ? "" : "border-dashed"}`}>
-              <div className="num text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</div>
+            <a key={platform.id} href={platform.to ?? "/auth"} className={`group rounded-lg border bg-card p-4 transition-colors hover:border-cyan-500/60 hover:bg-cyan-500/[0.04] ${platform.status === "live" ? "" : "border-dashed"}`}>
+              <div className="flex items-center justify-between gap-2"><div className="num text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</div><span aria-hidden="true" className="text-cyan-600 transition-transform group-hover:translate-x-1">↗</span></div>
               <div className="mt-1 text-sm font-medium">{platform.name}</div>
               <p className="mt-1 text-xs text-muted-foreground">{platform.description}</p>
               <div className={`mt-2 text-xs font-medium ${platform.status === "live" ? "text-primary" : "text-muted-foreground"}`}>{PLATFORM_STATUS_LABEL[platform.status]}</div>
-            </div>
+              <p className="mt-3 text-xs font-medium text-cyan-700">Abrir plataforma</p>
+            </a>
           ))}
         </div>
       </section>
