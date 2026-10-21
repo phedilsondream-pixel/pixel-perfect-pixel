@@ -21,6 +21,24 @@ export const Route = createFileRoute("/_authenticated/app/departamentos")({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 const platformEntitlementCode: Record<string, string> = { hr_employees: "hr", business_projects: "projects", operations_work_orders: "operations", production_orders: "production", education_students: "education", hospitality_orders: "restaurant", legal_documents: "legal" };
+const platformReadRoles: Record<string, string[]> = {
+ hr_employees: ["owner","admin","director","hr","hr_manager","hr_staff","employee"],
+ business_projects: ["owner","admin","director","manager","project_manager","employee","accountant","auditor","sales","support","operator","supervisor","teacher"],
+ operations_work_orders: ["owner","admin","director","manager","operations","operations_manager","supervisor","operator"],
+ production_orders: ["owner","admin","director","manager","production","production_manager","operator"],
+ education_students: ["owner","admin","director","education_admin","registrar","teacher"],
+ hospitality_orders: ["owner","admin","director","manager","restaurant_manager","restaurant","pos","cashier","operator"],
+ legal_documents: ["owner","admin","director","legal_manager","lawyer","contract_manager"]
+};
+const platformWriteRoles: Record<string, string[]> = {
+ hr_employees: ["owner","admin","director","hr","hr_manager"],
+ business_projects: ["owner","admin","director","manager","project_manager"],
+ operations_work_orders: ["owner","admin","director","manager","operations","operations_manager","supervisor","operator"],
+ production_orders: ["owner","admin","director","manager","production","production_manager","operator"],
+ education_students: ["owner","admin","director","education_admin","registrar","teacher"],
+ hospitality_orders: ["owner","admin","director","manager","restaurant_manager","restaurant","pos","cashier","operator"],
+ legal_documents: ["owner","admin","director","legal_manager","lawyer","contract_manager"]
+};
 const platforms = [
  { id:"hr_employees", title:"Recursos Humanos", table:"hr_employees", icon:Users, name:"full_name", code:"employee_number", status:"employment_status", statuses:["active","leave","suspended","terminated"], fields:[["employee_number","N.º funcionário"],["full_name","Nome completo"],["work_email","Email profissional"],["phone","Telefone"],["department","Departamento"],["job_title","Cargo"],["hire_date","Data de admissão"]] },
  { id:"business_projects", title:"Projetos", table:"business_projects", icon:BriefcaseBusiness, name:"name", code:"code", status:"status", statuses:["planned","active","on_hold","completed","cancelled"], fields:[["code","Código"],["name","Nome do projeto"],["description","Descrição"],["start_date","Data de início"],["due_date","Prazo"],["budget","Orçamento"]] },
@@ -32,7 +50,7 @@ const platforms = [
 ] as const;
 
 function Departments() {
- const { orgId, can } = useOrg();
+ const { orgId, current, can } = useOrg();
  const qc = useQueryClient();
  const [active, setActive] = useState<string>(platforms[0].id);
  const [formOpen, setFormOpen] = useState(false);
@@ -51,9 +69,9 @@ function Departments() {
    return (data??[]).map((row:{platform_code:string})=>row.platform_code) as string[];
   }
  });
- const availablePlatforms = useMemo(() => platforms.filter(p => entitlementQuery.data?.includes(platformEntitlementCode[p.id]) || (p.id==="hospitality_orders" && (entitlementQuery.data?.includes("restaurant") || entitlementQuery.data?.includes("pos")))), [entitlementQuery.data]);
+ const availablePlatforms = useMemo(() => platforms.filter(p => (entitlementQuery.data?.includes(platformEntitlementCode[p.id]) || (p.id==="hospitality_orders" && (entitlementQuery.data?.includes("restaurant") || entitlementQuery.data?.includes("pos"))) && platformReadRoles[p.id].includes(current?.role ?? "")), [entitlementQuery.data,current?.role]);
  const platform = useMemo(() => availablePlatforms.find(p => p.id === active) ?? availablePlatforms[0] ?? platforms[0], [availablePlatforms,active]);
- const writable = can(["owner","admin","director","manager","supervisor","operator","employee","accountant","teacher","support"]);
+ const writable = platformWriteRoles[platform.id].includes(current?.role ?? "") || can(["owner","admin"]);
  const query = useQuery({
   queryKey:["department-records",orgId,platform.table],
   enabled:!!orgId && availablePlatforms.some(p=>p.id===platform.id),
