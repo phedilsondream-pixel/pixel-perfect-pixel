@@ -31,7 +31,7 @@ const movementLabels: Record<string, string> = { opening: "Stock inicial", recei
 
 function Inventory() {
   const { orgId, can } = useOrg();
-  const readRoles = ["owner", "admin", "director", "manager", "warehouse", "warehouse_manager", "stock_manager", "sales", "sales_manager", "operator", "accountant"];
+  const readRoles = ["owner", "admin", "director", "manager", "warehouse", "warehouse_manager", "stock_manager", "sales", "sales_manager", "operator", "accountant", "auditor"];
   const writeRoles = ["owner", "admin", "warehouse", "warehouse_manager", "stock_manager"];
   const allowed = readRoles.some((role) => can([role]));
   const writable = writeRoles.some((role) => can([role]));
