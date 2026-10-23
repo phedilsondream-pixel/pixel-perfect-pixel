@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg, FINANCE_READ } from "@/lib/org";
 import { PageHeader, Empty } from "@/components/AppShell";
@@ -14,6 +18,7 @@ export const Route = createFileRoute("/_authenticated/app/")({
 
 function Dashboard() {
   const { orgId, current, can } = useOrg();
+  if (!orgId) return <CreateOrganization />;
   const finance = can(FINANCE_READ);
   const q = useQuery({
     queryKey: ["dashboard", orgId, finance],
@@ -92,6 +97,71 @@ function Kpi({ label, value, hint }: { label: string; value: string; hint?: stri
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="num mt-2 text-xl font-medium">{value}</div>
       {hint && <div className="mt-1 text-xs text-destructive">{hint}</div>}
+    </div>
+  );
+}
+
+
+function CreateOrganization() {
+  const qc = useQueryClient();
+  const [name, setName] = useState("");
+  const [nif, setNif] = useState("");
+  const [logo, setLogo] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (name.trim().length < 2) return toast.error("Introduza o nome da empresa.");
+    if (logo && (!["image/png", "image/jpeg", "image/webp"].includes(logo.type) || logo.size > 2 * 1024 * 1024)) {
+      return toast.error("O logótipo deve ser PNG, JPG ou WebP e ter no máximo 2 MB.");
+    }
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.rpc("create_my_organization", {
+        p_name: name.trim(),
+        p_nif: nif.trim() || null,
+      });
+      if (error) throw error;
+      const orgId = data as string;
+      if (logo) {
+        const ext = logo.type === "image/png" ? "png" : logo.type === "image/webp" ? "webp" : "jpg";
+        const path = orgId + "/logo." + ext;
+        const { error: uploadError } = await supabase.storage.from("organization-logos").upload(path, logo, { upsert: true, contentType: logo.type });
+        if (uploadError) throw uploadError;
+        const { error: logoError } = await supabase.from("organizations").update({ logo_url: path }).eq("id", orgId);
+        if (logoError) throw logoError;
+      }
+      await qc.invalidateQueries({ queryKey: ["memberships"] });
+      await qc.invalidateQueries();
+      toast.success("Empresa criada com sucesso.");
+      window.location.assign("/app");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Não foi possível criar a empresa.";
+      toast.error(message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6 py-6">
+      <PageHeader title="Criar a sua empresa" description="Configure o espaço da sua organização para começar a usar a Nexora Business Suite." />
+      <form onSubmit={submit} className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-lg md:p-7">
+        <div className="space-y-2">
+          <Label htmlFor="company-name">Nome da empresa *</Label>
+          <Input id="company-name" required minLength={2} maxLength={160} autoComplete="organization" value={name} onChange={e => setName(e.target.value)} placeholder="Ex.: Empresa Comercial, Lda." />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="company-nif">NIF</Label>
+          <Input id="company-nif" maxLength={40} value={nif} onChange={e => setNif(e.target.value)} placeholder="Número de Identificação Fiscal" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="company-logo">Logótipo (opcional)</Label>
+          <Input id="company-logo" type="file" accept="image/png,image/jpeg,image/webp" onChange={e => setLogo(e.target.files?.[0] ?? null)} />
+          <p className="text-xs text-muted-foreground">PNG, JPG ou WebP; máximo 2 MB. Pode adicionar o logótipo mais tarde.</p>
+        </div>
+        <Button type="submit" variant="copper" className="w-full" disabled={busy}>{busy ? "A criar empresa…" : "Criar empresa e continuar"}</Button>
+      </form>
     </div>
   );
 }
