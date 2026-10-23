@@ -11,6 +11,8 @@ const db = supabase as any;
 type Platform = { code: string; name: string; description: string; sort_order: number };
 type Subscription = { plan_id: string; status: string; current_period_end: string | null; trial_ends_at: string | null; created_at: string };
 
+const departmentIdByCode: Record<string, string> = { hr: "hr_employees", projects: "business_projects", operations: "operations_work_orders", production: "production_orders", education: "education_students", restaurant: "hospitality_orders", pos: "hospitality_orders", legal: "legal_documents" };
+
 const routeByPlatform: Record<string, string> = {
   finance: "/app/financas",
   invoicing: "/app/faturacao",
@@ -101,7 +103,7 @@ function Modules() {
                 </>
               );
               return included && to
-                ? <Link key={platform.code} to={to as never} search={to === "/app/departamentos" ? { platform: platform.code } as never : undefined} className="rounded-xl border bg-card p-5 shadow-soft transition-colors hover:border-cyan">{card}</Link>
+                ? <Link key={platform.code} to={to as never} search={to === "/app/departamentos" ? { platform: departmentIdByCode[platform.code] ?? platform.code } as never : undefined} className="rounded-xl border bg-card p-5 shadow-soft transition-colors hover:border-cyan">{card}</Link>
                 : <article key={platform.code} className="rounded-xl border border-dashed bg-card/60 p-5">{card}</article>;
             })}
           </div>
