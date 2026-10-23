@@ -101,7 +101,7 @@ function Modules() {
                 </>
               );
               return included && to
-                ? <Link key={platform.code} to={to as never} className="rounded-xl border bg-card p-5 shadow-soft transition-colors hover:border-cyan">{card}</Link>
+                ? <Link key={platform.code} to={to as never} search={to === "/app/departamentos" ? { platform: platform.code } as never : undefined} className="rounded-xl border bg-card p-5 shadow-soft transition-colors hover:border-cyan">{card}</Link>
                 : <article key={platform.code} className="rounded-xl border border-dashed bg-card/60 p-5">{card}</article>;
             })}
           </div>
