@@ -18,7 +18,6 @@ export const Route = createFileRoute("/_authenticated/app/")({
 
 function Dashboard() {
   const { orgId, current, can } = useOrg();
-  if (!orgId) return <CreateOrganization />;
   const finance = can(FINANCE_READ);
   const q = useQuery({
     queryKey: ["dashboard", orgId, finance],
@@ -44,6 +43,8 @@ function Dashboard() {
   const income = d?.tx.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0) ?? 0;
   const expense = d?.tx.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0) ?? 0;
   const sub = d?.sub as { status: string; trial_ends_at: string | null; plans: { name: string } | null } | null | undefined;
+
+  if (!orgId) return <CreateOrganization />;
 
   return (
     <>
