@@ -101,7 +101,7 @@ function Invites() {
     if (!platformCode) return toast.error("Selecione a plataforma/departamento de destino.");
     const { data: authData } = await supabase.auth.getUser();
     if (!authData.user) return toast.error("A sessão expirou. Entre novamente.");
-    const { error } = await supabase.from("organization_invitations").insert({
+    const { error } = await db.from("organization_invitations").insert({
       organization_id: orgId!, email: clean, role: role as "employee" | "admin" | "director" | "manager" | "supervisor" | "operator" | "accountant" | "hr" | "sales" | "support" | "auditor", platform_code: platformCode, invited_by: authData.user.id,
     });
     if (error) return toast.error(error.code === "23505" ? "Já existe um convite pendente para este email." : errMsg(error));
@@ -109,7 +109,7 @@ function Invites() {
     setEmail(""); setPlatformCode(""); qc.invalidateQueries({ queryKey: ["invites"] });
   }
   async function revoke(id: string) {
-    const { error } = await supabase.from("organization_invitations").update({ status: "revoked" }).eq("id", id);
+    const { error } = await db.from("organization_invitations").update({ status: "revoked" }).eq("id", id);
     if (error) return toast.error(errMsg(error));
     qc.invalidateQueries({ queryKey: ["invites"] });
   }
