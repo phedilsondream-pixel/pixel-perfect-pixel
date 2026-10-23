@@ -44,8 +44,8 @@ const platformWriteRoles: Record<string, string[]> = {
  legal_documents: ["owner","admin","director","legal_manager","lawyer","contract_manager"]
 };
 const platforms = [
- { id:"hr_employees", title:"Recursos Humanos", table:"hr_employees", icon:Users, name:"full_name", code:"employee_number", status:"employment_status", statuses:["active","leave","suspended","terminated"], fields:[["employee_number","N.º funcionário"],["full_name","Nome completo"],["work_email","Email profissional"],["phone","Telefone"],["department","Departamento"],["job_title","Cargo"],["hire_date","Data de admissão"]] },
- { id:"business_projects", title:"Projetos", table:"business_projects", icon:BriefcaseBusiness, name:"name", code:"code", status:"status", statuses:["planned","active","on_hold","completed","cancelled"], fields:[["code","Código"],["name","Nome do projeto"],["description","Descrição"],["start_date","Data de início"],["due_date","Prazo"],["budget","Orçamento"]] },
+ { id:"hr_employees", title:"Recursos Humanos", table:"employees", icon:Users, name:"full_name", code:"employee_number", status:"status", statuses:["active","leave","suspended","terminated"], fields:[["employee_number","N.º funcionário"],["full_name","Nome completo"],["email","Email profissional"],["phone","Telefone"],["department","Departamento"],["position","Cargo"],["hire_date","Data de admissão"]] },
+ { id:"business_projects", title:"Projetos", table:"projects", icon:BriefcaseBusiness, name:"name", code:"code", status:"status", statuses:["planned","active","on_hold","completed","cancelled"], fields:[["code","Código"],["name","Nome do projeto"],["description","Descrição"],["start_date","Data de início"],["end_date","Prazo"],["budget","Orçamento"]] },
  { id:"operations_work_orders", title:"Operações", table:"operations_work_orders", icon:Wrench, name:"title", code:"reference", status:"status", statuses:["open","scheduled","in_progress","blocked","completed","cancelled"], fields:[["reference","Referência"],["title","Título"],["work_type","Tipo de trabalho"],["priority","Prioridade"],["scheduled_at","Agendado para"],["notes","Notas"]] },
  { id:"production_orders", title:"Produção", table:"production_orders", icon:Factory, name:"product_name", code:"order_number", status:"status", statuses:["planned","released","in_progress","quality_check","completed","cancelled"], fields:[["order_number","N.º ordem"],["product_name","Produto"],["quantity_planned","Quantidade planeada"],["planned_start","Início previsto"],["planned_end","Fim previsto"],["notes","Notas"]] },
  { id:"education_students", title:"Educação", table:"education_students", icon:GraduationCap, name:"full_name", code:"student_number", status:"status", statuses:["active","inactive","graduated","transferred"], fields:[["student_number","N.º aluno"],["full_name","Nome completo"],["guardian_name","Encarregado"],["guardian_phone","Telefone do encarregado"],["class_name","Turma"],["academic_year","Ano letivo"]] },
@@ -92,7 +92,7 @@ function HospitalityOrderActions({ orgId, orderId, orderNumber, status, total, w
   queryKey:["hospitality-finance-accounts",orgId],
   enabled:open&&!closed,
   queryFn:async()=>{
-   const {data,error}=await db.from("bank_accounts").select("id,name,type,is_active").eq("organization_id",orgId).eq("is_active",true).order("name");
+   const {data,error}=await db.from("finance_accounts").select("id,name,type,is_active").eq("organization_id",orgId).eq("is_active",true).order("name");
    if(error) throw error;
    return (data??[]) as FinanceAccount[];
   }
