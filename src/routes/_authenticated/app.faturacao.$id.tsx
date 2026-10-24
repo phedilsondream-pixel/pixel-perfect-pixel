@@ -13,6 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatKz, formatDate, errMsg, DOC_TYPES, INVOICE_STATUS, lineTotals } from "@/lib/format";
 
+// Product catalogue columns were added by the current database migrations.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+type ProductOption = { id: string; name: string; sku: string | null; price: number | null; unit: string | null };
+
 export const Route = createFileRoute("/_authenticated/app/faturacao/$id")({
   head: () => ({ meta: [{ title: "Documento — Nexora" }, { name: "description", content: "Detalhe do documento comercial." }, { property: "og:title", content: "Documento — Nexora" }, { property: "og:description", content: "Detalhe do documento comercial." }] }),
   component: InvoiceDetail,
@@ -27,32 +32,46 @@ function InvoiceDetail() {
     queryKey: ["invoice", id],
     queryFn: async () => {
       const [inv, items] = await Promise.all([
-        supabase.from("invoices").select("*, customers(*)").eq("id", id).maybeSingle(),
+        supabase.from("invoices").select("*").eq("id", id).maybeSingle(),
         supabase.from("invoice_items").select("*").eq("invoice_id", id).order("sort_order"),
       ]);
       if (inv.error) throw inv.error;
-      return { inv: inv.data, items: items.data ?? [] };
+      if (items.error) throw items.error;
+      const customerResult = inv.data?.customer_id
+        ? await supabase.from("customers").select("id,name,nif,tax_id,address").eq("id", inv.data.customer_id).eq("organization_id", inv.data.organization_id).maybeSingle()
+        : { data: null, error: null };
+      if (customerResult.error) throw customerResult.error;
+      return { inv: inv.data ? { ...inv.data, customers: customerResult.data } : null, items: items.data ?? [] };
+    },
+  });
+  const productsQuery = useQuery({
+    queryKey: ["invoice-products", orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await db.from("products").select("id,name,sku,price,unit").eq("organization_id", orgId!).eq("is_active", true).order("name");
+      if (error) throw error;
+      return (data ?? []) as ProductOption[];
     },
   });
   const refresh = () => { qc.invalidateQueries({ queryKey: ["invoice", id] }); qc.invalidateQueries({ queryKey: ["invoices"] }); qc.invalidateQueries({ queryKey: ["dashboard"] }); };
 
-  const [line, setLine] = useState({ description: "", quantity: "1", unit_price: "", tax_rate: String(current?.organizations?.default_tax_rate ?? 14) });
+  const [line, setLine] = useState({ product_id: "", description: "", quantity: "1", unit_price: "", tax_rate: String(current?.organizations?.default_tax_rate ?? 14) });
 
   if (q.isLoading) return <p className="text-muted-foreground">A carregar…</p>;
   const inv = q.data?.inv;
   if (!inv) return <Empty title="Documento não encontrado" hint="Pode ter sido apagado ou não tem acesso." />;
   const items = q.data!.items;
   const draft = inv.status === "draft";
-  const cust = inv.customers as { name: string; nif: string | null; address: string | null } | null;
+  const cust = inv.customers as { name: string; nif: string | null; tax_id: string | null; address: string | null } | null;
   const preview = lineTotals(Number(line.quantity) || 0, Number(line.unit_price) || 0, Number(line.tax_rate) || 0);
 
   async function addLine(e: React.FormEvent) {
     e.preventDefault();
     const quantity = Number(line.quantity), unit_price = Number(line.unit_price), tax_rate = Number(line.tax_rate);
     if (!(quantity > 0) || !(unit_price >= 0) || !(tax_rate >= 0 && tax_rate <= 100)) return toast.error("Valores inválidos.");
-    const { error } = await supabase.from("invoice_items").insert({ invoice_id: id, organization_id: orgId!, description: line.description.trim(), quantity, unit_price, tax_rate, sort_order: items.length });
+    const { error } = await supabase.from("invoice_items").insert({ invoice_id: id, organization_id: orgId!, product_id: line.product_id || null, description: line.description.trim(), quantity, unit_price, tax_rate, sort_order: Math.max(-1, ...items.map((item) => Number(item.sort_order ?? -1))) + 1 });
     if (error) return toast.error(errMsg(error));
-    setLine({ ...line, description: "", unit_price: "", quantity: "1" });
+    setLine({ ...line, product_id: "", description: "", unit_price: "", quantity: "1" });
     refresh();
   }
   async function removeLine(lineId: string) {
@@ -80,8 +99,9 @@ function InvoiceDetail() {
         <div className="flex flex-wrap gap-2">
           {draft && can(SALES_WRITE) && <>
             <Button variant="ghost" onClick={removeDraft}>Apagar rascunho</Button>
-            <Button variant="copper" onClick={issue} disabled={items.length === 0}>Emitir documento</Button>
+            <Button variant="copper" onClick={issue} disabled={items.length === 0 || inv.doc_type !== "PF"}>Emitir pró-forma interna</Button>
           </>}
+          {draft && inv.doc_type !== "PF" && <p className="max-w-md text-xs text-amber-600">A emissão fiscal de FT/FR/NC está bloqueada até a Nexora concluir a integração e autorização da AGT. Pode guardar o documento como rascunho; não será apresentado como fatura fiscal emitida.</p>}
           {inv.status === "issued" && can(FINANCE_WRITE) && <>
             {Number(inv.amount_paid) === 0 && <CancelDialog id={id} onDone={refresh} />}
             <PayDialog id={id} due={Number(inv.total) - Number(inv.amount_paid)} onDone={refresh} />
@@ -103,7 +123,7 @@ function InvoiceDetail() {
           </div>
         </div>
         <div className="mt-8 grid gap-6 text-sm sm:grid-cols-3">
-          <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Cliente</div><div className="mt-1 font-medium">{cust?.name}</div>{cust?.nif && <div className="text-muted-foreground">NIF {cust.nif}</div>}{cust?.address && <div className="text-muted-foreground">{cust.address}</div>}</div>
+          <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Cliente</div><div className="mt-1 font-medium">{cust?.name}</div>{(cust?.nif ?? cust?.tax_id) && <div className="text-muted-foreground">NIF {cust?.nif ?? cust?.tax_id}</div>}{cust?.address && <div className="text-muted-foreground">{cust.address}</div>}</div>
           <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Data</div><div className="mt-1">{formatDate(inv.issue_date)}</div></div>
           <div><div className="text-xs uppercase tracking-wider text-muted-foreground">Vencimento</div><div className="mt-1">{formatDate(inv.due_date)}</div></div>
         </div>
@@ -130,7 +150,8 @@ function InvoiceDetail() {
         </div>
 
         {draft && can(SALES_WRITE) && (
-          <form onSubmit={addLine} className="mt-4 grid gap-2 rounded-md bg-muted p-3 sm:grid-cols-[1fr_80px_130px_80px_auto] print:hidden">
+          <form onSubmit={addLine} className="mt-4 grid gap-2 rounded-md bg-muted p-3 sm:grid-cols-[1.3fr_1.3fr_80px_130px_80px_auto] print:hidden">
+            <select aria-label="Produto do catálogo (opcional)" value={line.product_id} onChange={(e) => { const selected = productsQuery.data?.find((product) => product.id === e.target.value); setLine({ ...line, product_id: e.target.value, description: selected?.name ?? line.description, unit_price: selected ? String(selected.price ?? 0) : line.unit_price }); }} className="h-10 rounded-md border border-input bg-background px-3 text-sm"><option value="">Linha manual / serviço</option>{(productsQuery.data ?? []).map((product) => <option key={product.id} value={product.id}>{product.name}{product.sku ? ` · ${product.sku}` : ""}</option>)}</select>
             <Input required maxLength={200} placeholder="Descrição" value={line.description} onChange={(e) => setLine({ ...line, description: e.target.value })} />
             <Input required type="number" step="0.001" min="0.001" aria-label="Quantidade" value={line.quantity} onChange={(e) => setLine({ ...line, quantity: e.target.value })} />
             <Input required type="number" step="0.01" min="0" placeholder="Preço (Kz)" value={line.unit_price} onChange={(e) => setLine({ ...line, unit_price: e.target.value })} />
