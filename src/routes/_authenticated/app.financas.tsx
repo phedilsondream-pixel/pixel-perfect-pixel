@@ -27,7 +27,7 @@ function Finance() {
       const [acc, bal, tx] = await Promise.all([
         supabase.from("bank_accounts").select("*").eq("organization_id", orgId!).order("created_at"),
         supabase.rpc("account_balances", { _org: orgId! }),
-        supabase.from("transactions").select("*, bank_accounts(name)").eq("organization_id", orgId!).order("tx_date", { ascending: false }).order("created_at", { ascending: false }).limit(200),
+        supabase.from("transactions").select("*").eq("organization_id", orgId!).order("tx_date", { ascending: false }).order("created_at", { ascending: false }).limit(200),
       ]);
       if (acc.error) throw acc.error;
       const balances = new Map((bal.data ?? []).map((b) => [b.account_id, Number(b.balance)]));
@@ -64,7 +64,7 @@ function Finance() {
                   <td className="px-4 py-2">{formatDate(t.tx_date)}</td>
                   <td className="px-4 py-2">{t.description || "—"}</td>
                   <td className="px-4 py-2 text-muted-foreground">{t.category}</td>
-                  <td className="px-4 py-2 text-muted-foreground">{(t.bank_accounts as { name: string } | null)?.name}</td>
+                  <td className="px-4 py-2 text-muted-foreground">{d.accounts.find((a) => a.id === t.account_id)?.name ?? "Conta"}</td>
                   <td className={`num px-4 py-2 text-right ${t.kind === "income" ? "text-success" : "text-destructive"}`}>{t.kind === "income" ? "+" : "−"}{formatKz(t.amount)}</td>
                 </tr>
               ))}

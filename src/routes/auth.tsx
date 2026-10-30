@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +46,7 @@ function AuthPage() {
         if (password.length < 8) throw new Error("A palavra-passe deve ter pelo menos 8 caracteres.");
         const { data, error } = await supabase.auth.signUp({
           email, password,
-          options: { emailRedirectTo: `${window.location.origin}/app`, data: { full_name: name } },
+          options: { emailRedirectTo: `${window.location.origin}/auth`, data: { full_name: name } },
         });
         if (error) throw error;
         if (!data.session) toast.success("Conta criada. Confirme o seu email para continuar.");
@@ -64,7 +63,8 @@ function AuthPage() {
   }
 
   async function google() {
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: `${window.location.origin}/auth` } });
+    const r = { error };
     if (r.error) toast.error(errMsg(r.error));
   }
 
